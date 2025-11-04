@@ -27,18 +27,19 @@ const Login = () => {
     try {
       const res = await axios.post("http://localhost:5000/api/auth/login", formData);
 
-      // ✅ Store token and user info
-      const { token, user } = res.data; // assuming your API returns both
+      // ✅ Get data from backend
+      const { token, user, redirect } = res.data;
+
+      // ✅ Save login data
       localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user)); // Save full user object
+      localStorage.setItem("user", JSON.stringify(user));
 
       setSuccess("Login successful!");
 
-      // ✅ Navigate based on role or default to dashboard
+      // ✅ Navigate using backend redirect (clean + dynamic)
       setTimeout(() => {
-        if (user.role === "creator") navigate("/creator-dashboard");
-        else navigate("/");
-      }, 1500);
+        navigate(redirect || "/");
+      }, 1200);
     } catch (err) {
       setError(err.response?.data?.message || "Invalid email or password!");
     }

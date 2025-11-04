@@ -40,7 +40,7 @@ router.get("/donor-dashboard", protect, authorize("donor"), (req, res) => {
 // CREATOR DASHBOARD ROUTE
 // ---------------------------
 // Only a 'creator' can access this route
-router.get("/creator-dashboard", protect, authorize("creator"), (req, res) => {
+router.get("/creator/creator-dashboard", protect, authorize("creator"), (req, res) => {
   res.json({
     message: "Welcome to the Cause Creator Dashboard!",
     user: {

@@ -30,10 +30,11 @@ router.post("/signup", async (req, res) => {
 });
 
 // Login
+// Login
 router.post("/login", async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const { email, password } = req.body; // ✅ changed from username → email
+    const user = await User.findOne({ email }); // ✅ changed from username → email
 
     if (!user) return res.status(400).json({ message: "User not found!" });
 
@@ -48,19 +49,24 @@ router.post("/login", async (req, res) => {
 
     // Redirect path based on role
     let dashboard = "";
-    if (user.role === "admin") dashboard = "/admin-dashboard";
-    if (user.role === "donor") dashboard = "/donor-dashboard";
-    if (user.role === "creator") dashboard = "/creator-dashboard";
+    if (user.role === "admin") dashboard = "/admin/admin-dashboard";
+    if (user.role === "donor") dashboard = "/donor/donor-dashboard";
+    if (user.role === "creator") dashboard = "/creator/creator-dashboard";
 
     res.status(200).json({
       message: "Login successful!",
       token,
-      role: user.role,
+      user: {
+        name: user.username, // ✅ send name for frontend
+        email: user.email,
+        role: user.role,
+      },
       redirect: dashboard,
     });
   } catch (error) {
     res.status(500).json({ message: "Error logging in", error });
   }
 });
+
 
 module.exports = router;
