@@ -8,7 +8,8 @@ import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import CreatorDashboard from "./pages/creator/CreatorDashboard";
 import CreateCause from "./pages/creator/CreateCause";
-import CauseList from "./pages/creator/MyCauses";
+
+import MyCauses from "./pages/creator/MyCauses";
 
 // ✅ Wrapper to control Navbar & Footer visibility
 const AppContent = () => {
@@ -39,7 +40,7 @@ const AppContent = () => {
           {/* 🧑‍💼 Creator Routes */}
           <Route path="/creator/creator-dashboard" element={<CreatorDashboard />} />
           <Route path="/creator/create-cause" element={<CreateCause />} />
-          <Route path="/creator/causes" element={<CauseList />} />
+          <Route path="/creator/causes" element={<MyCauses />} />
         </Routes>
       </main>
 

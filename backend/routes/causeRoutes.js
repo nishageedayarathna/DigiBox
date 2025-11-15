@@ -3,6 +3,7 @@ const multer = require("multer");
 const path = require("path");
 const Cause = require("../models/causeModel");
 const { protect, authorize } = require("../middleware/authMiddleware");
+//const fs = require("fs");
 
 const router = express.Router();
 
@@ -82,6 +83,12 @@ router.get("/my-causes", protect, authorize("creator"), async (req, res) => {
     res.status(500).json({ message: "Error fetching causes", error: err.message });
   }
 });
+
+/*------------------evidence file download -------------------------*/
+router.get("/file/:filename", protect, (req, res) => {
+  res.sendFile(path.join(__dirname, "../uploads", req.params.filename));
+});
+
 
 /* ---------- Dashboard stats for creator ---------- */
 router.get("/stats", protect, authorize("creator"), async (req, res) => {

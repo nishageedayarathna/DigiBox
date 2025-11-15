@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
+
 import Sidebar from "../../components/dashboard/Sidebar";
 import StatsCard from "../../components/dashboard/StatCard";
 import AnalyticsChart from "../../components/dashboard/BarChartView";
@@ -9,27 +11,49 @@ import QuickActions from "../../components/dashboard/QuickActions";
 const CreatorDashboard = () => {
   const [activeView, setActiveView] = useState("dashboard");
 
-  const chartData = [
-    { month: "Jan", causes: 2 },
-    { month: "Feb", causes: 3 },
-    { month: "Mar", causes: 1 },
-    { month: "Apr", causes: 4 },
-  ];
+  const [stats, setStats] = useState(null);
+  const [recentCauses, setRecentCauses] = useState([]);
+  const [chartData, setChartData] = useState([]);
 
-  const stats = [
-    { title: "Total Causes Created", value: 12 },
-    { title: "Approved Causes", value: 7 },
-    { title: "Pending Causes", value: 3 },
-    { title: "Rejected Causes", value: 2 },
-    { title: "Total Funds Raised", value: "LKR 54,000" },
-  ];
+  useEffect(() => {
+    const token = localStorage.getItem("token");
 
-  const recentCauses = [
-    { title: "Help School Renovation", status: "Approved", date: "2025-10-25" },
-    { title: "Medical Support", status: "Pending", date: "2025-10-28" },
-  ];
+    /* ----------- FETCH STATS ----------- */
+    axios
+      .get("http://localhost:5000/api/cause/stats", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setStats(res.data))
+      .catch((err) => console.error("Stats error:", err));
 
-  const handleBack = () => setActiveView("dashboard");
+    /* ----------- FETCH RECENT CAUSES ----------- */
+    axios
+      .get("http://localhost:5000/api/cause/my-causes", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        setRecentCauses(res.data.slice(0, 5)); // show latest 5
+      })
+      .catch((err) => console.error("Recent causes error:", err));
+
+    /* ----------- FETCH ANALYTICS CHART DATA ----------- */
+    axios
+      .get("http://localhost:5000/api/cause/analytics/monthly", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        const formatted = res.data.map((d) => ({
+          month: months[d.month - 1],
+          causes: d.count,
+        }));
+
+        setChartData(formatted);
+      })
+      .catch((err) => console.error("Analytics error:", err));
+  }, []);
 
   return (
     <div className="bg-[#111827] min-h-screen text-white flex">
@@ -37,6 +61,7 @@ const CreatorDashboard = () => {
 
       <main className="flex-1 p-8 md:ml-64 overflow-x-hidden">
         <AnimatePresence mode="wait">
+          {/* DASHBOARD VIEW */}
           {activeView === "dashboard" && (
             <motion.div
               key="dashboard"
@@ -45,31 +70,44 @@ const CreatorDashboard = () => {
               exit={{ opacity: 0, x: 30 }}
               transition={{ duration: 0.5 }}
             >
-              <h1 className="text-3xl font-bold text-[#26bfef] mb-6">Creator Dashboard</h1>
+              <h1 className="text-3xl font-bold text-[#26bfef] mb-6">
+                Creator Dashboard
+              </h1>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
-                {stats.map((s, i) => (
-                  <StatsCard key={i} title={s.title} value={s.value} />
-                ))}
-              </div>
+              {/* Stats Section */}
+              {stats && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
+                  <StatsCard title="Total Causes Created" value={stats.totalCauses} />
+                  <StatsCard title="Approved Causes" value={stats.approved} />
+                  <StatsCard title="Pending Causes" value={stats.pending} />
+                  <StatsCard title="Rejected Causes" value={stats.rejected} />
+                  <StatsCard title="Total Funds Raised" value={`LKR ${stats.totalFunds}`} />
+                </div>
+              )}
 
+              {/* Chart */}
               <div className="bg-[#1F2937] p-6 rounded-2xl shadow-lg mb-10">
-                <h2 className="text-xl font-semibold mb-4 text-[#26bfef]">Monthly Causes Created</h2>
+                <h2 className="text-xl font-semibold mb-4 text-[#26bfef]">
+                  Monthly Causes Created
+                </h2>
                 <AnalyticsChart data={chartData} showLabels />
               </div>
 
+              {/* Recent Causes */}
               <RecentList
                 title="Recent Causes Created"
                 data={recentCauses}
                 titleKey="title"
                 statusKey="status"
-                dateKey="date"
+                dateKey="createdAt"
               />
 
+              {/* Quick Actions */}
               <QuickActions role="creator" onViewChange={setActiveView} />
             </motion.div>
           )}
 
+          {/* ANALYTICS VIEW */}
           {activeView === "analytics" && (
             <motion.div
               key="analytics"
@@ -79,9 +117,11 @@ const CreatorDashboard = () => {
               transition={{ duration: 0.5 }}
             >
               <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-[#26bfef]">Analytics Overview</h1>
+                <h1 className="text-3xl font-bold text-[#26bfef]">
+                  Analytics Overview
+                </h1>
                 <button
-                  onClick={handleBack}
+                  onClick={() => setActiveView("dashboard")}
                   className="px-4 py-2 bg-[#26bfef] text-white rounded-lg hover:bg-[#0a6c8b] transition"
                 >
                   ← Back to Dashboard
