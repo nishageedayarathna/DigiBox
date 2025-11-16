@@ -11,16 +11,19 @@ import CreateCause from "./pages/creator/CreateCause";
 
 import MyCauses from "./pages/creator/MyCauses";
 
+
+
 // ✅ Wrapper to control Navbar & Footer visibility
 const AppContent = () => {
   const location = useLocation();
 
   // Paths where Navbar & Footer should be hidden
   const dashboardPaths = [
-    "/creator/creator-dashboard",
-    "/creator/create-cause",
-    "/creator/causes",
-  ];
+  "/creator/creator-dashboard",
+  "/creator/create-cause",
+  "/creator/causes"
+];
+
 
   const isDashboard = dashboardPaths.includes(location.pathname);
 
@@ -41,6 +44,7 @@ const AppContent = () => {
           <Route path="/creator/creator-dashboard" element={<CreatorDashboard />} />
           <Route path="/creator/create-cause" element={<CreateCause />} />
           <Route path="/creator/causes" element={<MyCauses />} />
+
         </Routes>
       </main>
 

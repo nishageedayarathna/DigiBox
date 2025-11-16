@@ -41,37 +41,52 @@ router.post(
   upload.single("evidenceFile"),
   async (req, res) => {
     try {
-      if (!req.file) return res.status(400).json({ message: "Evidence file required" });
+      if (!req.file) {
+        return res.status(400).json({ message: "Evidence file required" });
+      }
 
-      const fileType = req.file.mimetype === "application/pdf" ? "pdf" : "image";
+      // File size check (max 5MB)
+      if (req.file.size > 5 * 1024 * 1024) {
+        return res.status(400).json({ message: "File cannot exceed 5MB" });
+      }
+
+      const fileType =
+        req.file.mimetype === "application/pdf" ? "pdf" : "image";
+
+      // Additional backend checks
+      if (!/^07\d{8}$/.test(req.body.beneficiaryContact)) {
+        return res
+          .status(400)
+          .json({ message: "Invalid Sri Lankan contact number" });
+      }
+
+      if (!/^\d{6,20}$/.test(req.body.beneficiaryAccountNumber)) {
+        return res
+          .status(400)
+          .json({ message: "Account number must be 6–20 digits only" });
+      }
 
       const cause = new Cause({
         creator: req.user._id,
-        title: req.body.title,
-        description: req.body.description,
-        requiredAmount: Number(req.body.requiredAmount) || 0,
-
-        beneficiaryName: req.body.beneficiaryName,
-        beneficiaryContact: req.body.beneficiaryContact,
-
-        // ✅ Added new fields for bank/security
-        beneficiaryAccountName: req.body.beneficiaryAccountName,
-        beneficiaryBank: req.body.beneficiaryBank,
+        ...req.body,
+        requiredAmount: Number(req.body.requiredAmount),
         beneficiaryAccountNumber: req.body.beneficiaryAccountNumber,
-        beneficiaryBranch: req.body.beneficiaryBranch,
-
         evidenceFile: `/uploads/${req.file.filename}`,
-        evidenceFileType: fileType
+        evidenceFileType: fileType,
       });
 
       await cause.save();
       return res.status(201).json({ message: "Cause created", cause });
     } catch (err) {
       console.error(err);
-      return res.status(500).json({ message: "Error creating cause", error: err.message });
+      return res.status(500).json({
+        message: "Error creating cause",
+        error: err.message,
+      });
     }
   }
 );
+
 
 
 /* ---------- Get "My Causes" (creator) ---------- */
