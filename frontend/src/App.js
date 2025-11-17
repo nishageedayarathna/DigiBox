@@ -6,49 +6,63 @@ import Footer from "./components/Footer";
 import LandingPage from "./pages/LandingPage";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
+
+// Creator Pages
 import CreatorDashboard from "./pages/creator/CreatorDashboard";
 import CreateCause from "./pages/creator/CreateCause";
-
 import MyCauses from "./pages/creator/MyCauses";
 
+// Admin Pages
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import PendingCauses from "./pages/admin/PendingCauses";
+import ApprovedCauses from "./pages/admin/ApprovedCauses";
+import RejectedCauses from "./pages/admin/RejectedCauses";
+import ManageUsers from "./pages/admin/ManageUsers";
 
-
-// ✅ Wrapper to control Navbar & Footer visibility
 const AppContent = () => {
   const location = useLocation();
 
-  // Paths where Navbar & Footer should be hidden
+  // Hide navbar + footer for creator & admin dashboards
   const dashboardPaths = [
-  "/creator/creator-dashboard",
-  "/creator/create-cause",
-  "/creator/causes"
-];
+    "/creator/creator-dashboard",
+    "/creator/create-cause",
+    "/creator/causes",
 
+    "/admin/admin-dashboard",
+    "/admin/pending",
+    "/admin/approved",
+    "/admin/rejected",
+    "/admin/manage-users"
+  ];
 
   const isDashboard = dashboardPaths.includes(location.pathname);
 
   return (
     <div className="bg-[#111827] text-white min-h-screen flex flex-col">
-      {/* ✅ Show Navbar only on non-dashboard pages */}
+      
       {!isDashboard && <Navbar />}
 
-      {/* ✅ Main Content */}
       <main className="flex-grow">
         <Routes>
-          {/* 🌐 Public Routes */}
+          {/* Public */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
 
-          {/* 🧑‍💼 Creator Routes */}
+          {/* Creator */}
           <Route path="/creator/creator-dashboard" element={<CreatorDashboard />} />
           <Route path="/creator/create-cause" element={<CreateCause />} />
           <Route path="/creator/causes" element={<MyCauses />} />
 
+          {/* Admin */}
+          <Route path="/admin/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/pending" element={<PendingCauses />} />
+          <Route path="/admin/approved" element={<ApprovedCauses />} />
+          <Route path="/admin/rejected" element={<RejectedCauses />} />
+          <Route path="/admin/manage-users" element={<ManageUsers />} />
         </Routes>
       </main>
 
-      {/* ✅ Show Footer only on non-dashboard pages */}
       {!isDashboard && <Footer />}
     </div>
   );

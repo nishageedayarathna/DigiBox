@@ -10,6 +10,11 @@ router.post("/signup", async (req, res) => {
   try {
     const { username, email, role, password, confirmPassword } = req.body;
 
+    // ❌ Prevent admin role from signup
+    if (role === "admin") {
+      return res.status(403).json({ message: "Admin account cannot be created via signup" });
+    }
+
     if (password !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match!" });
     }
@@ -46,6 +51,7 @@ router.post("/login", async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "2h" }
     );
+
 
     // Redirect path based on role
     let dashboard = "";

@@ -63,7 +63,7 @@ const Signup = () => {
             >
               <option value="donor">Donor</option>
               <option value="creator">Cause Creator</option>
-              <option value="admin">Admin</option>
+              
             </select>
           </div>
 

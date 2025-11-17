@@ -7,6 +7,7 @@ import StatsCard from "../../components/dashboard/StatCard";
 import AnalyticsChart from "../../components/dashboard/BarChartView";
 import RecentList from "../../components/dashboard/RecentList";
 import QuickActions from "../../components/dashboard/QuickActions";
+import UserProfileMenu from "../../components/dashboard/UserProfileMenu";
 
 const CreatorDashboard = () => {
   const [activeView, setActiveView] = useState("dashboard");
@@ -31,9 +32,7 @@ const CreatorDashboard = () => {
       .get("http://localhost:5000/api/cause/my-causes", {
         headers: { Authorization: `Bearer ${token}` },
       })
-      .then((res) => {
-        setRecentCauses(res.data.slice(0, 5)); // show latest 5
-      })
+      .then((res) => setRecentCauses(res.data.slice(0, 5)))
       .catch((err) => console.error("Recent causes error:", err));
 
     /* ----------- FETCH ANALYTICS CHART DATA ----------- */
@@ -42,8 +41,10 @@ const CreatorDashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => {
-        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const months = [
+          "Jan","Feb","Mar","Apr","May","Jun",
+          "Jul","Aug","Sep","Oct","Nov","Dec"
+        ];
 
         const formatted = res.data.map((d) => ({
           month: months[d.month - 1],
@@ -61,6 +62,7 @@ const CreatorDashboard = () => {
 
       <main className="flex-1 p-8 md:ml-64 overflow-x-hidden">
         <AnimatePresence mode="wait">
+
           {/* DASHBOARD VIEW */}
           {activeView === "dashboard" && (
             <motion.div
@@ -70,9 +72,14 @@ const CreatorDashboard = () => {
               exit={{ opacity: 0, x: 30 }}
               transition={{ duration: 0.5 }}
             >
-              <h1 className="text-3xl font-bold text-[#26bfef] mb-6">
-                Creator Dashboard
-              </h1>
+              
+              {/* 🔵 Dashboard Header + Profile Menu */}
+              <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold text-[#26bfef]">
+                  Creator Dashboard
+                </h1>
+                <UserProfileMenu />
+              </div>
 
               {/* Stats Section */}
               {stats && (
@@ -120,6 +127,7 @@ const CreatorDashboard = () => {
                 <h1 className="text-3xl font-bold text-[#26bfef]">
                   Analytics Overview
                 </h1>
+
                 <button
                   onClick={() => setActiveView("dashboard")}
                   className="px-4 py-2 bg-[#26bfef] text-white rounded-lg hover:bg-[#0a6c8b] transition"
@@ -136,6 +144,7 @@ const CreatorDashboard = () => {
               </div>
             </motion.div>
           )}
+
         </AnimatePresence>
       </main>
     </div>
