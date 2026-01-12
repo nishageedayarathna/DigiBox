@@ -4,73 +4,89 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 
 const router = express.Router();
+const { protect, authorize } = require("../middleware/authMiddleware");
 
-// Register
+
+// Signup
 router.post("/signup", async (req, res) => {
   try {
     const { username, email, role, password, confirmPassword } = req.body;
 
-    // ❌ Prevent admin role from signup
-    if (role === "admin") {
-      return res.status(403).json({ message: "Admin account cannot be created via signup" });
+    if (["admin", "gs", "ds"].includes(role)) {
+      return res.status(403).json({
+        message: "This role cannot be created via signup",
+      });
     }
 
     if (password !== confirmPassword) {
-      return res.status(400).json({ message: "Passwords do not match!" });
+      return res.status(400).json({ message: "Passwords do not match" });
     }
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "Email already exists!" });
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(400).json({ message: "Email already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ username, email, role, password: hashedPassword });
-    await newUser.save();
+    const hashed = await bcrypt.hash(password, 10);
 
-    res.status(201).json({ message: "User registered successfully!" });
-  } catch (error) {
-    res.status(500).json({ message: "Error registering user", error });
+    await User.create({
+      username,
+      email,
+      role,
+      password: hashed,
+    });
+
+    res.status(201).json({ message: "User registered successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Signup error", error: err.message });
   }
 });
 
 // Login
-// Login
 router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) return res.status(400).json({ message: "User not found" });
+
+  const match = await bcrypt.compare(password, user.password);
+  if (!match) return res.status(400).json({ message: "Invalid password" });
+
+  const token = jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "2h" }
+  );
+
+  res.json({
+    token,
+    user: {
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      areaCode: user.areaCode || null,
+    },
+  });
+});
+
+// POST /api/auth/reset-password
+
+router.put("/reset-password", protect, async (req, res) => {
   try {
-    const { email, password } = req.body; // ✅ changed from username → email
-    const user = await User.findOne({ email }); // ✅ changed from username → email
+    const user = await User.findById(req.user.id); // logged-in user
+    const { newPassword } = req.body;
 
-    if (!user) return res.status(400).json({ message: "User not found!" });
+    if (!newPassword) return res.status(400).json({ message: "Password required" });
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid password!" });
+    const hashed = await bcrypt.hash(newPassword, 10);
+    user.password = hashed;
+    user.mustResetPassword = false; // cleared after reset
+    await user.save();
 
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "2h" }
-    );
-
-
-    // Redirect path based on role
-    let dashboard = "";
-    if (user.role === "admin") dashboard = "/admin/admin-dashboard";
-    if (user.role === "donor") dashboard = "/donor/donor-dashboard";
-    if (user.role === "creator") dashboard = "/creator/creator-dashboard";
-
-    res.status(200).json({
-      message: "Login successful!",
-      token,
-      user: {
-        name: user.username, // ✅ send name for frontend
-        email: user.email,
-        role: user.role,
-      },
-      redirect: dashboard,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Error logging in", error });
+    res.json({ message: "Password reset successfully" });
+  } catch (err) {
+    console.error("Reset password error:", err.message);
+    res.status(500).json({ message: "Server error resetting password" });
   }
 });
 

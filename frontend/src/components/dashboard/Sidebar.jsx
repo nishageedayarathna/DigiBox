@@ -8,6 +8,8 @@ import {
   FaUserShield,
   FaSignOutAlt,
   FaUsers,
+  FaPeopleCarry,
+  FaClipboardList,
 } from "react-icons/fa";
 
 const Sidebar = ({ role = "creator" }) => {
@@ -26,13 +28,18 @@ const Sidebar = ({ role = "creator" }) => {
       { path: "/donor/my-donations", label: "My Donations", icon: <FaList /> },
     ],
 
-    admin: [
+    // Sidebar.jsx (admin menu)
+
+  admin: [
       { path: "/admin/admin-dashboard", label: "Dashboard", icon: <FaHome /> },
-      { path: "/admin/pending", label: "Pending Causes", icon: <FaUserShield /> },
-      { path: "/admin/approved", label: "Approved Causes", icon: <FaChartBar /> },
-      { path: "/admin/rejected", label: "Rejected Causes", icon: <FaList /> },
+      { path: "/admin/approve-causes", label: "Admin Approval", icon: <FaList /> },
+      { path: "/admin/add-officer", label: "Add GS / DS", icon: <FaPlusCircle /> },
+      { path: "/admin/structure", label: "Admin Structure" , icon: <FaHome /> },
       { path: "/admin/manage-users", label: "Manage Users", icon: <FaUsers /> },
+      
     ],
+
+
   };
 
   const links = menus[role] || [];

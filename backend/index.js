@@ -6,6 +6,8 @@ const authRoutes = require("./routes/authRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const causeRoutes = require("./routes/causeRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const gsRoutes = require("./routes/gsRoutes");
+const dsRoutes = require("./routes/dsRoutes");
 const User = require("./models/userModel");
 const bcrypt = require("bcryptjs");
 
@@ -42,17 +44,12 @@ async function createAdminAccount() {
   }
 }
 
-
-
+// Middleware
 app.use(cors({
   origin: "http://localhost:3000",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
+  methods: ["GET", "POST","PUT","DELETE"],
+  credentials: true,
 }));
-
-
-
 
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
@@ -62,6 +59,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/cause", causeRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/gs", gsRoutes);
+app.use("/api/ds", dsRoutes);
+
+
 
 // Start server
 const PORT = process.env.PORT || 5000;

@@ -4,26 +4,22 @@ const { protect, authorize } = require("../middleware/authMiddleware");
 const router = express.Router();
 
 // ---------------------------
-// ADMIN DASHBOARD ROUTE
+// CREATOR DASHBOARD
 // ---------------------------
-// Only an 'admin' can access this route
-router.get("/admin-dashboard", protect, authorize("admin"), (req, res) => {
-  // req.user is available here thanks to the 'protect' middleware
+router.get("/creator-dashboard", protect, authorize("creator"), (req, res) => {
   res.json({
-    message: "Welcome to the Admin Dashboard!",
+    message: "Welcome to the Cause Creator Dashboard!",
     user: {
       username: req.user.username,
       email: req.user.email,
       role: req.user.role,
     },
-    // You'd send actual admin data here
   });
 });
 
 // ---------------------------
-// DONOR DASHBOARD ROUTE
+// DONOR DASHBOARD
 // ---------------------------
-// Only a 'donor' can access this route
 router.get("/donor-dashboard", protect, authorize("donor"), (req, res) => {
   res.json({
     message: "Welcome to the Donor Dashboard!",
@@ -32,23 +28,20 @@ router.get("/donor-dashboard", protect, authorize("donor"), (req, res) => {
       email: req.user.email,
       role: req.user.role,
     },
-    // You'd send actual donor data here
   });
 });
 
 // ---------------------------
-// CREATOR DASHBOARD ROUTE
+// ADMIN DASHBOARD
 // ---------------------------
-// Only a 'creator' can access this route
-router.get("/creator/creator-dashboard", protect, authorize("creator"), (req, res) => {
+router.get("/admin-dashboard", protect, authorize("admin"), (req, res) => {
   res.json({
-    message: "Welcome to the Cause Creator Dashboard!",
+    message: "Welcome to the Admin Dashboard!",
     user: {
       username: req.user.username,
       email: req.user.email,
       role: req.user.role,
     },
-    // You'd send actual creator data here
   });
 });
 

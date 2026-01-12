@@ -12,12 +12,13 @@ import CreatorDashboard from "./pages/creator/CreatorDashboard";
 import CreateCause from "./pages/creator/CreateCause";
 import MyCauses from "./pages/creator/MyCauses";
 
-// Admin Pages
+//Admin
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import PendingCauses from "./pages/admin/PendingCauses";
-import ApprovedCauses from "./pages/admin/ApprovedCauses";
-import RejectedCauses from "./pages/admin/RejectedCauses";
+import AddOfficer from "./pages/admin/AddOfficer";
+import ApproveCauses from "./pages/admin/ApproveCauses";
+import AdminStructure from "./pages/admin/AdminStructure";
 import ManageUsers from "./pages/admin/ManageUsers";
+
 
 const AppContent = () => {
   const location = useLocation();
@@ -27,12 +28,13 @@ const AppContent = () => {
     "/creator/creator-dashboard",
     "/creator/create-cause",
     "/creator/causes",
-
     "/admin/admin-dashboard",
-    "/admin/pending",
-    "/admin/approved",
-    "/admin/rejected",
-    "/admin/manage-users"
+    "/admin/add-officer",
+    "/admin/approve-causes",
+    "/admin/structure",
+    "/admin/manage-users",
+    
+
   ];
 
   const isDashboard = dashboardPaths.includes(location.pathname);
@@ -54,12 +56,14 @@ const AppContent = () => {
           <Route path="/creator/create-cause" element={<CreateCause />} />
           <Route path="/creator/causes" element={<MyCauses />} />
 
-          {/* Admin */}
-          <Route path="/admin/admin-dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/pending" element={<PendingCauses />} />
-          <Route path="/admin/approved" element={<ApprovedCauses />} />
-          <Route path="/admin/rejected" element={<RejectedCauses />} />
-          <Route path="/admin/manage-users" element={<ManageUsers />} />
+          {/*Admin Routes*/}
+        <Route path="/admin/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/approve-causes" element={<ApproveCauses />} />
+        <Route path="/admin/add-officer" element={<AddOfficer />} />
+        <Route path="/admin/structure" element={<AdminStructure />} />
+        <Route path="/admin/manage-users" element={<ManageUsers />} />
+        
+
         </Routes>
       </main>
 

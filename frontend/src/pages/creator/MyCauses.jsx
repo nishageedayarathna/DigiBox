@@ -60,12 +60,12 @@ const MyCauses = () => {
                   <span
                     className={`font-bold ${cause.status === "approved"
                         ? "text-green-400"
-                        : cause.status === "pending"
+                        : cause.displayStatus.includes("pending")
                           ? "text-yellow-400"
                           : "text-red-400"
                       }`}
                   >
-                    {cause.status}
+                    {cause.displayStatus}
                   </span>
                 </p>
 

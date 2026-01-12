@@ -1,3 +1,4 @@
+// Login.jsx
 import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,11 +8,7 @@ import SubmitButton from "../components/SubmitButton";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -26,19 +23,18 @@ const Login = () => {
 
     try {
       const res = await axios.post("http://localhost:5000/api/auth/login", formData);
+      const { token, user } = res.data;
 
-      // ✅ Get data from backend
-      const { token, user, redirect } = res.data;
-
-      // ✅ Save login data
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
       setSuccess("Login successful!");
 
-      // ✅ Navigate using backend redirect (clean + dynamic)
+      // ✅ Redirect based on role
       setTimeout(() => {
-        navigate(redirect || "/");
+        if (user.role === "creator") navigate("/creator/creator-dashboard");
+        else if (user.role === "admin") navigate("/admin/admin-dashboard");
+        else navigate("/");
       }, 1200);
     } catch (err) {
       setError(err.response?.data?.message || "Invalid email or password!");

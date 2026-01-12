@@ -1,140 +1,71 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Sidebar from "../../components/dashboard/Sidebar";
-
-// Chart.js Imports
-import { Doughnut } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
-
-ChartJS.register(ArcElement, Tooltip, Legend);
+import StatCard from "../../components/dashboard/StatCard";
+import PieChartView from "../../components/dashboard/PieChartView";
 
 const AdminDashboard = () => {
-  const [data, setData] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [pieData, setPieData] = useState([]);
 
   useEffect(() => {
-    fetchAnalytics();
+    const token = localStorage.getItem("token");
+
+    axios
+      .get("http://localhost:5000/api/admin/analytics", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setStats(res.data))
+      .catch(console.error);
+
+    axios
+      .get("http://localhost:5000/api/admin/analytics/pie", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        setPieData([
+          { name: "Pending Admin", value: res.data.pendingAdmin, color: "#FACC15" },
+          { name: "Sent to GS", value: res.data.sentToGS, color: "#3B82F6" },
+          { name: "Under DS", value: res.data.underDS, color: "#8B5CF6" },
+          { name: "Fully Approved", value: res.data.fullyApproved, color: "#22C55E" },
+          { name: "Rejected by Admin", value: res.data.rejected, color: "#EF4444" },
+        ]);
+      })
+      .catch(console.error);
   }, []);
 
-  const fetchAnalytics = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/admin/analytics", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      setData(res.data);
-    } catch (err) {
-      console.error("Error fetching analytics:", err);
-    }
-  };
-
-  if (!data) return <p className="text-white p-8">Loading...</p>;
-
-  // Pie Chart Data
-  const chartData = {
-    labels: ["Approved", "Rejected", "Pending"],
-    datasets: [
-      {
-        data: [
-          data.statusDistribution.approved,
-          data.statusDistribution.rejected,
-          data.statusDistribution.pending,
-        ],
-        backgroundColor: ["#34C38F", "#F46A6A", "#F1C40F"],
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    cutout: "65%",
-    plugins: {
-      legend: {
-        position: "bottom",
-        labels: { color: "white", font: { size: 12 } },
-      },
-    },
-  };
+  if (!stats) return <p className="text-white p-6">Loading...</p>;
 
   return (
-    <div className="bg-[#111827] min-h-screen text-white flex">
+    <div className="flex bg-[#111827] min-h-screen text-white">
       <Sidebar role="admin" />
 
-      <main className="flex-1 p-6 md:ml-64">
-        <h1 className="text-2xl font-semibold text-[#26bfef] mb-6">
+      <main className="ml-64 p-8 w-full">
+        <h1 className="text-3xl font-bold text-[#26bfef] mb-8">
           Admin Dashboard
         </h1>
 
-        {/* Analytics Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Stat label="Total Causes" value={data.totalCauses} />
-          <Stat label="Approval Rate" value={`${data.approvalRate}%`} />
-          <Stat label="Pending" value={data.pendingCauses} />
-          <Stat label="Active Creators" value={data.activeCreators} />
+        {/* STAT BOXES */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-6 mb-10">
+          <StatCard title="Total Causes" value={stats.totalCauses} />
+          <StatCard title="Pending Admin" value={stats.pendingAdmin} />
+          <StatCard title="Approved by Admin" value={stats.approvedByAdmin} />
+          <StatCard title="Rejected by Admin" value={stats.rejectedByAdmin} />
+          <StatCard title="Sent to GS" value={stats.sentToGS} />
+          <StatCard title="Under DS Approval" value={stats.underDS} />
+          <StatCard title="Fully Approved" value={stats.fullyApproved} />
         </div>
 
-        {/* Status Breakdown + Pie chart */}
-        <div className="bg-[#1F2937] p-5 rounded-xl shadow mb-8">
-          <h2 className="text-lg font-semibold text-[#26bfef] mb-4">
-            Status Breakdown
+        {/* PIE CHART */}
+        <div className="bg-[#1F2937] p-6 rounded-xl">
+          <h2 className="text-xl mb-4 text-[#26bfef]">
+            Cause Approval Distribution
           </h2>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
-            {/* Left Text */}
-            <ul className="space-y-1 text-gray-300 text-sm">
-              <li>✔ Approved: {data.statusDistribution.approved}</li>
-              <li>✖ Rejected: {data.statusDistribution.rejected}</li>
-              <li>⏳ Pending: {data.statusDistribution.pending}</li>
-            </ul>
-
-            {/* Compact Pie Chart */}
-            <div className="w-[220px] mx-auto">
-              <Doughnut data={chartData} options={chartOptions} />
-            </div>
-          </div>
-        </div>
-
-        {/* Recent Activities */}
-        <div className="bg-[#1F2937] p-5 rounded-xl shadow">
-          <h2 className="text-lg font-semibold text-[#26bfef] mb-4">
-            Recent Activities
-          </h2>
-
-          {data.recentActivities.map((activity) => (
-            <div
-              key={activity._id}
-              className="p-3 border-b border-gray-700 text-sm flex justify-between"
-            >
-              <div>
-                <p className="font-medium">{activity.title}</p>
-                <p className="text-xs text-gray-400">
-                  By {activity.creator.username}
-                </p>
-              </div>
-
-             <span
-  className={`capitalize px-3 py-1 rounded-full text-xs font-medium text-center flex items-center justify-center min-w-[80px] ${
-    activity.status === "approved"
-      ? "bg-green-600/30 text-green-300 border border-green-600"
-      : activity.status === "rejected"
-      ? "bg-red-600/30 text-red-300 border border-red-600"
-      : "bg-yellow-600/30 text-yellow-300 border border-yellow-600"
-  }`}
->
-  {activity.status}
-</span>
-
-            </div>
-          ))}
+          <PieChartView data={pieData} />
         </div>
       </main>
     </div>
   );
 };
-
-const Stat = ({ label, value }) => (
-  <div className="bg-[#1F2937] p-4 text-center rounded-lg shadow">
-    <p className="text-gray-400 text-xs">{label}</p>
-    <h3 className="text-xl font-bold text-[#26bfef]">{value}</h3>
-  </div>
-);
 
 export default AdminDashboard;
