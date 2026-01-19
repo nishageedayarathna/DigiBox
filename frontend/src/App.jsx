@@ -14,6 +14,13 @@ import AddOfficer from "./pages/admin/AddOfficer";
 import ApproveCauses from "./pages/admin/ApproveCauses";
 import ManageUsers from "./pages/admin/ManageUsers";
 
+//GS
+import GSDashboard  from "./pages/gs/GSDashboard";
+import Documents from "./pages/gs/Documents";
+import PendingCauses from "./pages/gs/PendingCauses";
+import ResetPassword from "./pages/gs/ResetPassword";
+
+
 // ✅ Auth guard
 const PrivateRoute = ({ children, role }) => {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -43,6 +50,12 @@ function App() {
         <Route path="/admin/add-officer" element={<AddOfficer />} />
         <Route path="/admin/manage-users" element={<ManageUsers />} />
 
+ {/*GS Routes */}
+        <Route path="/gs/gs-dashboardlayout" element={<GSDashboardLayout />}/>
+        <Route path="/gs/gs-dashboard" element={<GSDashboard />}/>
+        <Route path="/gs/gs-pendingcauses" element={<PendingCauses />}/>
+        <Route path="/gs/gs-resetpassword" element={<ResetPassword />}/>
+        <Route path="/gs/gs-documents" element={<Documents/>}/>
 
         
         {/* Default fallback */}

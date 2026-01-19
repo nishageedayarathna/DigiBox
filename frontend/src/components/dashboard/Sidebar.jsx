@@ -30,7 +30,7 @@ const Sidebar = ({ role = "creator" }) => {
 
     // Sidebar.jsx (admin menu)
 
-  admin: [
+    admin: [
       { path: "/admin/admin-dashboard", label: "Dashboard", icon: <FaHome /> },
       { path: "/admin/approve-causes", label: "Admin Approval", icon: <FaList /> },
       { path: "/admin/add-officer", label: "Add GS / DS", icon: <FaPlusCircle /> },
@@ -38,7 +38,21 @@ const Sidebar = ({ role = "creator" }) => {
       { path: "/admin/manage-users", label: "Manage Users", icon: <FaUsers /> },
       
     ],
+// sidebar GS menu
+    gs: [
+    { path: "/gs/gs-dashboard", label: "Dashboard", icon: <FaHome /> },
+    { path: "/gs/gs-pendingcauses", label: "Pending Causes", icon: <FaClipboardList /> },
+    { path: "/gs/gs-documents", label: "Documents", icon: <FaList /> },
+    { path: "/gs/gs-resetpassword", label: "Reset Password", icon: <FaUserShield /> },
+  ],
 
+  // ✅ DS MENU (optional but recommended)
+    ds: [
+    { path: "/ds-dashboard", label: "Dashboard", icon: <FaHome /> },
+    { path: "/ds/pending-causes", label: "Pending Causes", icon: <FaClipboardList /> },
+    { path: "/ds/documents", label: "Documents", icon: <FaList /> },
+    { path: "/ds/reset-password", label: "Reset Password", icon: <FaUserShield /> },
+  ],
 
   };
 

@@ -21,8 +21,8 @@ const AddOfficer = () => {
   const submit = async (e) => {
     e.preventDefault();
 
-    // Basic validations
-    if (!form.username || !form.email) return alert("Fill username and email");
+    if (!form.username || !form.email)
+      return alert("Fill username and email");
     if (!form.districtCode || !form.districtName)
       return alert("Fill district code and name");
     if (!form.divisionCode || !form.divisionName)
@@ -63,7 +63,6 @@ const AddOfficer = () => {
 
       alert(res.data.message);
 
-      // Reset form
       setForm({
         username: "",
         email: "",
@@ -84,91 +83,116 @@ const AddOfficer = () => {
   return (
     <div className="flex bg-[#111827] min-h-screen text-white">
       <Sidebar role="admin" />
-      <main className="ml-64 p-8 w-full">
-        <h1 className="text-2xl mb-6">Add GS / DS Officer</h1>
 
-        <form
-          onSubmit={submit}
-          className="bg-[#1F2937] p-6 rounded w-96 space-y-3"
-        >
-          <FormInput
-            label="Username"
-            type="text"
-            value={form.username}
-            onChange={(e) => setForm({ ...form, username: e.target.value })}
-          />
-          <FormInput
-            label="Email"
-            type="email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-          />
+      {/* MAIN AREA */}
+      <main className="flex-1 md:ml-64 flex items-center justify-center p-6">
+        <div className="w-full max-w-md bg-[#1F2937] rounded-2xl shadow-xl p-8">
+          <h1 className="text-2xl font-semibold text-center text-[#26bfef] mb-6">
+            Add GS / DS Officer
+          </h1>
 
-          <div>
-            <label className="block text-sm mb-1">Role</label>
-            <select
-              className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg text-white"
-              value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value })}
+          <form onSubmit={submit} className="space-y-4">
+            <FormInput
+              label="Username"
+              type="text"
+              value={form.username}
+              onChange={(e) =>
+                setForm({ ...form, username: e.target.value })
+              }
+            />
+
+            <FormInput
+              label="Email"
+              type="email"
+              value={form.email}
+              onChange={(e) =>
+                setForm({ ...form, email: e.target.value })
+              }
+            />
+
+            {/* Role */}
+            <div>
+              <label className="block text-sm mb-1 text-gray-300">
+                Role
+              </label>
+              <select
+                className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#26bfef]"
+                value={form.role}
+                onChange={(e) =>
+                  setForm({ ...form, role: e.target.value })
+                }
+              >
+                <option value="gs">GS Officer</option>
+                <option value="ds">DS Officer</option>
+              </select>
+            </div>
+
+            {/* District */}
+            <FormInput
+              label="District Code"
+              type="text"
+              value={form.districtCode}
+              onChange={(e) =>
+                setForm({ ...form, districtCode: e.target.value })
+              }
+            />
+            <FormInput
+              label="District Name"
+              type="text"
+              value={form.districtName}
+              onChange={(e) =>
+                setForm({ ...form, districtName: e.target.value })
+              }
+            />
+
+            {/* Division */}
+            <FormInput
+              label="Division Code"
+              type="text"
+              value={form.divisionCode}
+              onChange={(e) =>
+                setForm({ ...form, divisionCode: e.target.value })
+              }
+            />
+            <FormInput
+              label="Division Name"
+              type="text"
+              value={form.divisionName}
+              onChange={(e) =>
+                setForm({ ...form, divisionName: e.target.value })
+              }
+            />
+
+            {/* GS only */}
+            {form.role === "gs" && (
+              <>
+                <FormInput
+                  label="Area Code"
+                  type="text"
+                  value={form.areaCode}
+                  onChange={(e) =>
+                    setForm({ ...form, areaCode: e.target.value })
+                  }
+                />
+                <FormInput
+                  label="Area Name"
+                  type="text"
+                  value={form.areaName}
+                  onChange={(e) =>
+                    setForm({ ...form, areaName: e.target.value })
+                  }
+                />
+              </>
+            )}
+
+            <button
+              type="submit"
+              className="w-full bg-[#26bfef] hover:bg-[#0a6c8b] transition text-white font-medium py-3 rounded-lg"
             >
-              <option value="gs">GS</option>
-              <option value="ds">DS</option>
-            </select>
-          </div>
-
-          {/* District */}
-          <FormInput
-            label="District Code"
-            type="text"
-            value={form.districtCode}
-            onChange={(e) => setForm({ ...form, districtCode: e.target.value })}
-          />
-          <FormInput
-            label="District Name"
-            type="text"
-            value={form.districtName}
-            onChange={(e) => setForm({ ...form, districtName: e.target.value })}
-          />
-
-          {/* Division */}
-          <FormInput
-            label="Division Code"
-            type="text"
-            value={form.divisionCode}
-            onChange={(e) => setForm({ ...form, divisionCode: e.target.value })}
-          />
-          <FormInput
-            label="Division Name"
-            type="text"
-            value={form.divisionName}
-            onChange={(e) => setForm({ ...form, divisionName: e.target.value })}
-          />
-
-          {/* Area only for GS */}
-          {form.role === "gs" && (
-            <>
-              <FormInput
-                label="Area Code"
-                type="text"
-                value={form.areaCode}
-                onChange={(e) => setForm({ ...form, areaCode: e.target.value })}
-              />
-              <FormInput
-                label="Area Name"
-                type="text"
-                value={form.areaName}
-                onChange={(e) => setForm({ ...form, areaName: e.target.value })}
-              />
-            </>
-          )}
-
-          <button
-            type="submit"
-            className="bg-[#26bfef] px-4 py-2 rounded w-full"
-          >
-            Add Officer
-          </button>
-        </form>
+              Add Officer
+            </button>
+          </form>
+        </div>
       </main>
     </div>
   );

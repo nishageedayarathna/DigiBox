@@ -29,11 +29,13 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(user));
 
       setSuccess("Login successful!");
-
+const role = res.data.user.role;
       // ✅ Redirect based on role
       setTimeout(() => {
         if (user.role === "creator") navigate("/creator/creator-dashboard");
         else if (user.role === "admin") navigate("/admin/admin-dashboard");
+        else if(user.role === "gs") navigate("/gs/gs-dashboard");
+        else if(user.role === "ds") navigate("/ds/ds-dashboard");
         else navigate("/");
       }, 1200);
     } catch (err) {

@@ -19,6 +19,12 @@ import ApproveCauses from "./pages/admin/ApproveCauses";
 import AdminStructure from "./pages/admin/AdminStructure";
 import ManageUsers from "./pages/admin/ManageUsers";
 
+//import GS 
+
+import GSDashboard from "./pages/gs/GSDashboard"
+import Documents from "./pages/gs/Documents";
+import PendingCauses from "./pages/gs/PendingCauses";
+import ResetPassword from "./pages/gs/ResetPassword";
 
 const AppContent = () => {
   const location = useLocation();
@@ -33,6 +39,10 @@ const AppContent = () => {
     "/admin/approve-causes",
     "/admin/structure",
     "/admin/manage-users",
+    "/gs/gs-dashboard",
+    "/gs/gs-pendingcauses",
+    "/gs/gs-documents", 
+    "/gs/gs-resetpassword",
     
 
   ];
@@ -62,7 +72,14 @@ const AppContent = () => {
         <Route path="/admin/add-officer" element={<AddOfficer />} />
         <Route path="/admin/structure" element={<AdminStructure />} />
         <Route path="/admin/manage-users" element={<ManageUsers />} />
+
+      {/*GS Routes */}
         
+        <Route path="/gs/gs-dashboard" element={<GSDashboard />}/>
+        <Route path="/gs/gs-pendingcauses" element={<PendingCauses />}/>
+        <Route path="/gs/gs-resetpassword" element={<ResetPassword />}/>
+        <Route path="/gs/gs-documents" element={<Documents/>}/>
+
 
         </Routes>
       </main>
