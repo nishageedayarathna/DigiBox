@@ -1,3 +1,4 @@
+//causeModel.js
 const mongoose = require("mongoose");
 
 const causeSchema = new mongoose.Schema(
@@ -28,31 +29,27 @@ const causeSchema = new mongoose.Schema(
     gsOfficer: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     dsOfficer: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
-    // 🔥 APPROVAL FLOW
-    adminStatus: {
-      type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
-    },
-
-    gsStatus: {
-      type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
-    },
-
-    dsStatus: {
-      type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
-    },
-
-    finalStatus:{type:String,default:"pending"},
-
+    // Approval flow
+    adminStatus: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+    gsStatus: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+    dsStatus: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+    finalStatus: { type: String, default: "pending" },
     fundsRaised: { type: Number, default: 0 },
+
+    // 🔥 GS Verification fields
+    gsVerification: {
+      remarks: String,
+      recommendation: String,
+      date: Date,
+      signature: String, // can be image url or text
+    },
+    gsDocument: String, // PDF file path or URL
+
+    rejectionReason: String // reason if GS rejected
   },
   { timestamps: true }
 );
+
 
 
 module.exports = mongoose.model("Cause", causeSchema);

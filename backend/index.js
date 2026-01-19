@@ -43,6 +43,10 @@ async function createAdminAccount() {
     console.error("Error creating admin account:", error);
   }
 }
+const path = require("path");
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 
 // Middleware
 app.use(cors({
