@@ -15,6 +15,10 @@ dotenv.config();
 
 const app = express();
 
+// Increase payload limit
+app.use(express.json({ limit: '50mb' })); // default is 100kb
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
 // Connect to DB and then create admin if not exists
 connectDB().then(() => {
   createAdminAccount();

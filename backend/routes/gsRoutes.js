@@ -1,4 +1,3 @@
-// routes/gsRoutes.js
 const express = require("express");
 const Cause = require("../models/causeModel");
 const User = require("../models/userModel");
@@ -11,9 +10,7 @@ const bcrypt = require("bcryptjs");
 
 const router = express.Router();
 
-/* ----------------------------------------------------
-   GS DASHBOARD DATA
----------------------------------------------------- */
+/* ---------------- GS DASHBOARD ---------------- */
 router.get("/dashboard", protect, authorize("gs"), async (req, res) => {
   try {
     const user = req.user;
@@ -29,27 +26,38 @@ router.get("/dashboard", protect, authorize("gs"), async (req, res) => {
       },
     };
 
-    const totalCauses = await Cause.countDocuments({ areaCode: user.areaCode });
+    // Only consider causes where admin approved
+    const totalCauses = await Cause.countDocuments({
+      areaCode: user.areaCode,
+      adminStatus: "approved",
+    });
+
     const pendingCauses = await Cause.countDocuments({
       areaCode: user.areaCode,
+      adminStatus: "approved",
       gsStatus: "pending",
     });
+
     const approvedCauses = await Cause.countDocuments({
       areaCode: user.areaCode,
+      adminStatus: "approved",
       gsStatus: "approved",
     });
+
     const rejectedCauses = await Cause.countDocuments({
       areaCode: user.areaCode,
+      adminStatus: "approved",
       gsStatus: "rejected",
     });
 
-    // Monthly analytics
+    // Monthly analytics only for admin-approved causes
     const startOfYear = new Date(new Date().getFullYear(), 0, 1);
 
     const rawData = await Cause.aggregate([
       {
         $match: {
           areaCode: user.areaCode,
+          adminStatus: "approved",
           createdAt: { $gte: startOfYear },
         },
       },
@@ -86,13 +94,12 @@ router.get("/dashboard", protect, authorize("gs"), async (req, res) => {
   }
 });
 
-/* ----------------------------------------------------
-   GET PENDING CAUSES
----------------------------------------------------- */
+
+// GET PENDING CAUSES (only after admin approval)
 router.get("/pending-causes", protect, authorize("gs"), async (req, res) => {
   try {
     const causes = await Cause.find({
-      adminStatus: "approved",
+      adminStatus: "approved",   // only approved by admin
       gsStatus: "pending",
       areaCode: req.user.areaCode,
     }).populate("creator", "username email");
@@ -103,79 +110,101 @@ router.get("/pending-causes", protect, authorize("gs"), async (req, res) => {
   }
 });
 
-/* ----------------------------------------------------
-   APPROVE CAUSE + GENERATE PDF
----------------------------------------------------- */
+
+/* ---------------- APPROVE CAUSE + GENERATE PDF ---------------- */
 router.put("/approve/:id", protect, authorize("gs"), async (req, res) => {
   try {
     const { verificationNotes, signatureImage } = req.body;
-
-    if (!verificationNotes || !signatureImage) {
-      return res.status(400).json({ message: "Notes and signature required" });
-    }
+    if (!verificationNotes || !signatureImage) return res.status(400).json({ message: "Notes and signature required" });
 
     const cause = await Cause.findById(req.params.id).populate("creator");
     if (!cause) return res.status(404).json({ message: "Cause not found" });
 
-    // Update status
+    // Update GS info
     cause.gsStatus = "approved";
     cause.gsOfficer = req.user._id;
-    await cause.save();
+    cause.gsVerification = {
+      remarks: verificationNotes,
+      date: new Date(),
+      signature: "", // optional
+    };
 
     // Ensure uploads folder exists
     const uploadDir = path.join(__dirname, "../uploads");
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-    // Create PDF
-    const pdfPath = path.join(uploadDir, `verification_${cause._id}.pdf`);
-    const doc = new PDFDocument();
+    // PDF generation with letterhead
+    const pdfPath = path.join(uploadDir, `gs_approval_${cause._id}.pdf`);
+    const doc = new PDFDocument({ size: "A4", margin: 50 });
     doc.pipe(fs.createWriteStream(pdfPath));
 
-    doc.fontSize(16).text("GS Verification Report", { align: "center" });
-    doc.moveDown();
+    // Optional logo
+    const logoPath = path.join(__dirname, "../public/logo.png");
+    if (fs.existsSync(logoPath)) doc.image(logoPath, 50, 45, { width: 100 });
+
+    doc.fontSize(20).text("GS Approval Letter", 105, 150, { align: "center" });
+    doc.moveDown(2);
     doc.fontSize(12);
-    doc.text(`Cause: ${cause.title}`);
+    doc.text(`Date: ${new Date().toLocaleDateString()}`);
+    doc.text(`Cause Title: ${cause.title}`);
     doc.text(`Creator: ${cause.creator.username}`);
     doc.text(`Amount Required: LKR ${cause.requiredAmount}`);
+    doc.text(`Beneficiary: ${cause.beneficiaryName}`);
     doc.moveDown();
     doc.text("Verification Notes:");
     doc.text(verificationNotes);
     doc.moveDown();
 
-    const imgBuffer = Buffer.from(
-      signatureImage.replace(/^data:image\/\w+;base64,/, ""),
-      "base64"
-    );
+    // Add signature
+    const imgBuffer = Buffer.from(signatureImage.replace(/^data:image\/\w+;base64,/, ""), "base64");
     doc.image(imgBuffer, { width: 150 });
     doc.text(`Signed by: ${req.user.username}`);
 
     doc.end();
 
-    cause.gsVerificationPDF = `/uploads/verification_${cause._id}.pdf`;
+    // Save PDF path
+    cause.gsDocument = `/uploads/gs_approval_${cause._id}.pdf`;
     await cause.save();
 
-    // Notify DS
+    // Notify DS officer
     if (cause.dsOfficer) {
-      const dsUser = await User.findById(cause.dsOfficer);
-      if (dsUser) {
-        await sendEmail(
-          dsUser.email,
-          "Cause Approved by GS",
-          `Cause "${cause.title}" has been approved by GS Officer ${req.user.username}.`
-        );
-      }
-    }
+  const dsUser = await User.findById(cause.dsOfficer);
+  if (dsUser) {
+    const emailSubject = `GS Approval Notification: Cause "${cause.title}"`;
+    
+    const emailBody = `
+Dear ${dsUser.username},
 
-    res.json({ message: "Cause approved and verified", cause });
+This is to formally notify you that the cause titled "${cause.title}" has been reviewed and approved by the Grama Niladhari (GS) Officer, ${req.user.username}, on ${new Date().toLocaleDateString()}.
+
+GS Officer Remarks:
+${verificationNotes}
+
+You are requested to proceed with the next steps for further processing of this cause.
+
+Attached Documents:
+- Verification Letter by GS Officer: ${cause.gsVerificationPDF ? `http://localhost:5000${cause.gsVerificationPDF}` : "Not available"}
+
+Thank you for your attention.
+
+Best regards,
+DigiBox Donation System
+`;
+
+    await sendEmail(dsUser.email, emailSubject, emailBody);
+  }
+}
+
+
+
+    res.json({ message: "Cause approved and forwarded to DS officer", cause });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Approval failed" });
   }
 });
 
-/* ----------------------------------------------------
-   REJECT CAUSE
----------------------------------------------------- */
+/* ---------------- REJECT CAUSE ---------------- */
 router.put("/reject/:id", protect, authorize("gs"), async (req, res) => {
   try {
     const { reason } = req.body;
@@ -190,11 +219,7 @@ router.put("/reject/:id", protect, authorize("gs"), async (req, res) => {
 
     const admins = await User.find({ role: "admin" });
     for (const admin of admins) {
-      await sendEmail(
-        admin.email,
-        "Cause Rejected by GS",
-        `Cause "${cause.title}" was rejected.\nReason: ${reason}`
-      );
+      await sendEmail(admin.email, "Cause Rejected by GS", `Cause "${cause.title}" rejected.\nReason: ${reason}`);
     }
 
     res.json({ message: "Cause rejected successfully" });
@@ -203,14 +228,11 @@ router.put("/reject/:id", protect, authorize("gs"), async (req, res) => {
   }
 });
 
-/* ----------------------------------------------------
-   RESET PASSWORD
----------------------------------------------------- */
+/* ---------------- RESET PASSWORD ---------------- */
 router.put("/reset-password", protect, authorize("gs"), async (req, res) => {
   try {
     const { newPassword } = req.body;
-    if (!newPassword)
-      return res.status(400).json({ message: "Password required" });
+    if (!newPassword) return res.status(400).json({ message: "Password required" });
 
     const user = await User.findById(req.user.id);
     user.password = await bcrypt.hash(newPassword, 10);
@@ -222,13 +244,14 @@ router.put("/reset-password", protect, authorize("gs"), async (req, res) => {
     res.status(500).json({ message: "Password reset failed" });
   }
 });
-// ---------------- GS DOCUMENTS ----------------
+
+/* ---------------- GET GS DOCUMENTS ---------------- */
 router.get("/documents", protect, authorize("gs"), async (req, res) => {
   try {
     const docs = await Cause.find({
       areaCode: req.user.areaCode,
-      gsVerificationPDF: { $exists: true }
-    }).select("title gsVerificationPDF evidenceFile");
+      gsDocument: { $exists: true },
+    }).populate("gsOfficer", "username").select("title gsDocument updatedAt gsOfficer");
 
     res.json(docs);
   } catch (err) {
