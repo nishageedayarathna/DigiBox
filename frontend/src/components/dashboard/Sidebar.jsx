@@ -31,13 +31,13 @@ const Sidebar = ({ role = "creator" }) => {
     // Sidebar.jsx (admin menu)
 
     admin: [
-      { path: "/admin/admin-dashboard", label: "Dashboard", icon: <FaHome /> },
-      { path: "/admin/approve-causes", label: "Admin Approval", icon: <FaList /> },
-      { path: "/admin/add-officer", label: "Add GS / DS", icon: <FaPlusCircle /> },
-      { path: "/admin/structure", label: "Admin Structure" , icon: <FaHome /> },
-      { path: "/admin/manage-users", label: "Manage Users", icon: <FaUsers /> },
-      
-    ],
+  { path: "/admin/admin-dashboard", label: "Dashboard", icon: <FaHome /> },
+  { path: "/admin/approve-causes", label: "Admin Approval", icon: <FaList /> },
+  { path: "/admin/publish-causes", label: "Publish Causes", icon: <FaPlusCircle /> }, // Added
+  { path: "/admin/add-officer", label: "Add GS / DS", icon: <FaPlusCircle /> },
+  { path: "/admin/structure", label: "Admin Structure", icon: <FaHome /> },
+  { path: "/admin/manage-users", label: "Manage Users", icon: <FaUsers /> },
+],
 // sidebar GS menu
     gs: [
     { path: "/gs/gs-dashboard", label: "Dashboard", icon: <FaHome /> },
@@ -48,11 +48,12 @@ const Sidebar = ({ role = "creator" }) => {
 
   // ✅ DS MENU (optional but recommended)
     ds: [
-    { path: "/ds-dashboard", label: "Dashboard", icon: <FaHome /> },
-    { path: "/ds/pending-causes", label: "Pending Causes", icon: <FaClipboardList /> },
-    { path: "/ds/documents", label: "Documents", icon: <FaList /> },
-    { path: "/ds/reset-password", label: "Reset Password", icon: <FaUserShield /> },
-  ],
+  { path: "/ds/ds-dashboard", label: "Dashboard", icon: <FaHome /> },
+  { path: "/ds/ds-pendingcauses", label: "Pending Causes", icon: <FaClipboardList /> },
+  { path: "/ds/ds-documents", label: "Documents", icon: <FaList /> },
+  { path: "/ds/ds-resetpassword", label: "Reset Password", icon: <FaUserShield /> },
+],
+
 
   };
 

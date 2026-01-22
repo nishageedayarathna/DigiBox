@@ -1,11 +1,19 @@
-// GSDashboard.jsx
+// DSDashboard.jsx
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/dashboard/Sidebar";
-import { fetchGSDashboard } from "../../services/gsService";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { fetchDSDashboard } from "../../services/dsService";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 import { FaHourglassHalf, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
-const GSDashboard = () => {
+const DSDashboard = () => {
   const [stats, setStats] = useState(null);
   const [area, setArea] = useState(null);
   const [monthlyAnalytics, setMonthlyAnalytics] = useState([]);
@@ -13,7 +21,7 @@ const GSDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchGSDashboard()
+    fetchDSDashboard()
       .then((res) => {
         const data = res.data;
 
@@ -24,16 +32,15 @@ const GSDashboard = () => {
         });
 
         setArea({
-          district: data.welcomeInfo.gsOfficer.district,
-          division: data.welcomeInfo.gsOfficer.division,
-          gnArea: data.welcomeInfo.gsOfficer.area,
+          district: data.welcomeInfo.dsOfficer.district,
+          division: data.welcomeInfo.dsOfficer.division,
         });
 
         setMonthlyAnalytics(data.monthlyAnalytics || []);
         setUser({
-          username: data.welcomeInfo.gsOfficer.username,
-          email: data.welcomeInfo.gsOfficer.email,
-          profileImage: data.welcomeInfo.gsOfficer.profileImage || "/assets/images/user.webp",
+          username: data.welcomeInfo.dsOfficer.username,
+          email: data.welcomeInfo.dsOfficer.email,
+          profileImage: data.welcomeInfo.dsOfficer.profileImage || "/images/default-profile.png",
         });
 
         setLoading(false);
@@ -44,14 +51,11 @@ const GSDashboard = () => {
       });
   }, []);
 
-  // Safe loading
-  if (loading || !user || !area || !stats) {
-    return <p className="text-white p-8">Loading...</p>;
-  }
+  if (loading) return <p className="text-white p-8">Loading...</p>;
 
   return (
     <div className="bg-gradient-to-r from-[#111827] via-[#1F2937] to-[#111827] min-h-screen text-white flex relative">
-      <Sidebar role="gs" />
+      <Sidebar role="ds" />
 
       <main className="flex-1 p-8 md:ml-64">
         {/* Banner */}
@@ -66,26 +70,44 @@ const GSDashboard = () => {
         {/* Profile */}
         <div className="flex items-center gap-4 mb-6">
           <img
-            src={user.profileImage}
-            alt="GS Officer Profile"
+            src="/assets/images/user.webp" // default DS officer image
+            alt="DS Officer Profile"
             className="w-16 h-16 rounded-full border-2 border-[#26bfef]"
-          />
+            />
+
           <div>
             <h2 className="text-xl font-bold text-white">{user.username}</h2>
-            <p className="text-gray-400">{area.gnArea}, {area.division}, {area.district}</p>
+            <p className="text-gray-400">{area.division}, {area.district}</p>
           </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <StatCard title="Pending Causes" value={stats.pending} icon={<FaHourglassHalf />} color="yellow" />
-          <StatCard title="Approved Causes" value={stats.approved} icon={<FaCheckCircle />} color="green" />
-          <StatCard title="Rejected Causes" value={stats.rejected} icon={<FaTimesCircle />} color="red" />
+          <StatCard
+            title="Pending Causes"
+            value={stats.pending}
+            icon={<FaHourglassHalf />}
+            color="yellow"
+          />
+          <StatCard
+            title="Approved Causes"
+            value={stats.approved}
+            icon={<FaCheckCircle />}
+            color="green"
+          />
+          <StatCard
+            title="Rejected Causes"
+            value={stats.rejected}
+            icon={<FaTimesCircle />}
+            color="red"
+          />
         </div>
 
         {/* Monthly Analytics Chart */}
         <div className="bg-[#1F2937] p-6 rounded-xl shadow">
-          <h2 className="text-lg font-semibold text-[#26bfef] mb-4">Monthly Verification Stats</h2>
+          <h2 className="text-lg font-semibold text-[#26bfef] mb-4">
+            Monthly DS Verification Stats
+          </h2>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={monthlyAnalytics}>
               <XAxis dataKey="month" />
@@ -111,7 +133,9 @@ const StatCard = ({ title, value, icon, color }) => {
     red: "bg-red-600",
   };
   return (
-    <div className={`${colors[color] || "bg-blue-600"} p-5 rounded-xl flex items-center gap-4 shadow hover:shadow-lg transition`}>
+    <div
+      className={`${colors[color] || "bg-blue-600"} p-5 rounded-xl flex items-center gap-4 shadow hover:shadow-lg transition`}
+    >
       <div className="text-3xl text-white">{icon}</div>
       <div>
         <p className="text-gray-200">{title}</p>
@@ -121,4 +145,4 @@ const StatCard = ({ title, value, icon, color }) => {
   );
 };
 
-export default GSDashboard;
+export default DSDashboard;
