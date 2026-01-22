@@ -1,42 +1,277 @@
 const express = require("express");
 const Cause = require("../models/causeModel");
-const { protect, authorize } = require("../middleware/authMiddleware");
 const User = require("../models/userModel");
+const { protect, authorize } = require("../middleware/authMiddleware");
 const sendEmail = require("../utils/email");
+const PDFDocument = require("pdfkit");
+const fs = require("fs");
+const path = require("path");
+const bcrypt = require("bcryptjs");
 
 const router = express.Router();
 
-// GET pending causes for DS
-router.get("/pending-causes", protect, authorize("ds"), async (req, res) => {
+/* ---------------- DS DASHBOARD ---------------- */
+router.get("/dashboard", protect, authorize("ds"), async (req, res) => {
   try {
-    const causes = await Cause.find({ gsStatus: "approved", dsStatus: "pending", areaCode: req.user.areaCode });
-    res.json(causes);
+    const user = req.user;
+
+    const welcomeInfo = {
+      message: `Welcome ${user.username} to the DigiBox Donation System!`,
+      dsOfficer: {
+        username: user.username,
+        email: user.email,
+        district: user.districtName,
+        division: user.divisionName,
+      },
+    };
+
+    // All causes in officer's division that GS approved
+    const totalCauses = await Cause.countDocuments({
+      divisionCode: user.divisionCode,
+      gsStatus: "approved",
+    });
+
+    const pendingCauses = await Cause.countDocuments({
+      divisionCode: user.divisionCode,
+      gsStatus: "approved",
+      dsStatus: "pending",
+    });
+
+    const approvedCauses = await Cause.countDocuments({
+      divisionCode: user.divisionCode,
+      dsStatus: "approved",
+    });
+
+    const rejectedCauses = await Cause.countDocuments({
+      divisionCode: user.divisionCode,
+      dsStatus: "rejected",
+    });
+
+    // Monthly analytics based on DS decisions only
+    const startOfYear = new Date(new Date().getFullYear(), 0, 1);
+
+    const rawData = await Cause.aggregate([
+      {
+        $match: {
+          divisionCode: user.divisionCode,
+          createdAt: { $gte: startOfYear },
+          dsStatus: { $in: ["pending", "approved", "rejected"] },
+        },
+      },
+      {
+        $group: {
+          _id: { month: { $month: "$createdAt" }, status: "$dsStatus" },
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // Initialize months with 0 counts
+    const monthlyAnalytics = Array.from({ length: 12 }, (_, i) => ({
+      month: i + 1,
+      pending: 0,
+      approved: 0,
+      rejected: 0,
+    }));
+
+    rawData.forEach((item) => {
+      monthlyAnalytics[item._id.month - 1][item._id.status] = item.count;
+    });
+
+    res.json({
+      welcomeInfo,
+      totalCauses,
+      pendingCauses,
+      approvedCauses,
+      rejectedCauses,
+      monthlyAnalytics,
+    });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching causes", error: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Failed to load DS dashboard" });
   }
 });
 
-// DS approves → notify creator
+
+
+/* ---------------- PENDING CAUSES FOR DS ---------------- */
+router.get("/pending-causes", protect, authorize("ds"), async (req, res) => {
+  try {
+    const causes = await Cause.find({
+      divisionCode: req.user.divisionCode,
+      gsStatus: "approved",   // ONLY GS-approved causes
+      dsStatus: "pending",    // AND DS-pending causes
+    })
+      .populate("creator", "username email")
+      .populate("gsOfficer", "username");
+
+    res.json(causes);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch DS pending causes" });
+  }
+});
+
+
+
+
+/* ---------------- APPROVE CAUSE ---------------- */
 router.put("/approve/:id", protect, authorize("ds"), async (req, res) => {
   try {
-    const cause = await Cause.findById(req.params.id).populate("creator");
+    const { approvalNote, signatureImage } = req.body;
+    if (!approvalNote || !signatureImage)
+      return res.status(400).json({ message: "Approval note & signature required" });
+
+    const cause = await Cause.findById(req.params.id);
     if (!cause) return res.status(404).json({ message: "Cause not found" });
 
     cause.dsStatus = "approved";
-    cause.status = "approved"; // visible to donors
+    cause.finalStatus = "approved";
+    cause.dsOfficer = req.user._id;
+
+    cause.dsVerification = {
+      approvalNote,
+      date: new Date(),
+      signature: "",
+    };
+
+    const uploadDir = path.join(__dirname, "../uploads");
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+
+    const pdfPath = path.join(uploadDir, `ds_approval_${cause._id}.pdf`);
+    const doc = new PDFDocument();
+    doc.pipe(fs.createWriteStream(pdfPath));
+
+    doc.fontSize(18).text("DS Approval Letter", { align: "center" });
+    doc.moveDown();
+    doc.text(`Cause: ${cause.title}`);
+    doc.text(`Division: ${cause.divisionName}`);
+    doc.moveDown();
+    doc.text("Approval Note:");
+    doc.text(approvalNote);
+    doc.moveDown();
+
+    const img = Buffer.from(signatureImage.split(",")[1], "base64");
+    doc.image(img, { width: 150 });
+    doc.text(`Signed by DS Officer: ${req.user.username}`);
+    doc.end();
+
+    cause.dsDocument = `/uploads/ds_approval_${cause._id}.pdf`;
     await cause.save();
 
-    // Notify creator
-    await sendEmail(
-      cause.creator.email,
-      `Cause "${cause.title}" Fully Approved`,
-      `Hello ${cause.creator.username},\n\nYour cause "${cause.title}" has been fully approved and is now visible to donors.\n\nThank you.`
-    );
+    // Notify Admin
+    const admins = await User.find({ role: "admin" });
+    for (const admin of admins) {
+      await sendEmail(
+  "admin@example.com",
+  "Cause Fully Approved – Ready for Donations",
+  `
+Hello Admin,
 
-    res.json({ message: "DS approved & creator notified", cause });
+The following cause has been FULLY VERIFIED and APPROVED.
+
+Cause Details:
+- Title: ${cause.title}
+- District: ${cause.districtName}
+- Division: ${cause.divisionName}
+- GS Area: ${cause.areaName}
+- Required Amount: LKR ${cause.requiredAmount}
+
+Verification Status:
+✔ Admin Approved
+✔ GS Verified (PDF attached)
+✔ DS Approved (PDF attached)
+
+This cause is now READY to BE RELEASED for public donations.
+
+Please log in to the Admin Dashboard to:
+- Review all evidence documents
+- Publish the cause for donations
+
+Thank you,
+DigiBox Donation System
+  `
+);
+
+    }
+
+    res.json({ message: "Cause fully approved", cause });
   } catch (err) {
-    res.status(500).json({ message: "Error approving cause", error: err.message });
+    res.status(500).json({ message: "DS approval failed" });
   }
 });
+
+/* ---------------- REJECT CAUSE ---------------- */
+router.put("/reject/:id", protect, authorize("ds"), async (req, res) => {
+  try {
+    const { reason } = req.body;
+    if (!reason) return res.status(400).json({ message: "Reason required" });
+
+    const cause = await Cause.findById(req.params.id);
+    if (!cause) return res.status(404).json({ message: "Cause not found" });
+
+    cause.dsStatus = "rejected";
+    cause.finalStatus = "rejected";
+    cause.rejectionReason = reason;
+    await cause.save();
+
+    const admins = await User.find({ role: "admin" });
+    for (const admin of admins) {
+      await sendEmail(
+        admin.email,
+        "Cause Rejected by DS",
+        `Cause "${cause.title}" rejected.\nReason: ${reason}`
+      );
+    }
+
+    res.json({ message: "Cause rejected and admin notified" });
+  } catch {
+    res.status(500).json({ message: "Rejection failed" });
+  }
+});
+
+/* ---------------- RESET PASSWORD ---------------- */
+router.put("/reset-password", protect, authorize("ds"), async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ message: "Password is required" });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+    user.mustResetPassword = false;
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error("DS reset password error:", err);
+    res.status(500).json({ message: "Password reset failed" });
+  }
+});
+
+
+/* ---------------- GET DS DOCUMENTS ---------------- */
+router.get("/documents", protect, authorize("ds"), async (req, res) => {
+  try {
+    const docs = await Cause.find({
+      divisionCode: req.user.divisionCode,
+      dsDocument: { $exists: true },
+    })
+      .populate("dsOfficer", "username")
+      .select("title dsDocument updatedAt dsOfficer");
+
+    res.json(docs);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error fetching DS documents" });
+  }
+});
+
 
 module.exports = router;

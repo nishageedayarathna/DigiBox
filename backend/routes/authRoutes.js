@@ -91,4 +91,44 @@ router.put("/reset-password", protect, async (req, res) => {
 });
 
 
+
+/* ---------------- GET FULLY APPROVED CAUSES ---------------- */
+router.get("/approved-causes", protect, authorize("admin"), async (req, res) => {
+  try {
+    const causes = await Cause.find({ finalStatus: "approved", isPublished: { $ne: true } })
+      .populate("creator", "username email")
+      .populate("gsOfficer", "username")
+      .populate("dsOfficer", "username");
+    res.json(causes);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to fetch approved causes" });
+  }
+});
+
+/* ---------------- PUBLISH A CAUSE ---------------- */
+router.put("/publish/:id", protect, authorize("admin"), async (req, res) => {
+  try {
+    const cause = await Cause.findById(req.params.id);
+    if (!cause) return res.status(404).json({ message: "Cause not found" });
+
+    if (cause.finalStatus !== "approved")
+      return res.status(400).json({ message: "Cause must be fully approved first" });
+
+    cause.isPublished = true;
+    cause.publishedAt = new Date();
+    cause.publishedBy = req.user._id;
+
+    await cause.save();
+
+    res.json({ message: "Cause published successfully", cause });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to publish cause" });
+  }
+});
+
+
+
+
 module.exports = router;

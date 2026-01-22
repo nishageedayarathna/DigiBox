@@ -182,9 +182,6 @@ ${verificationNotes}
 
 You are requested to proceed with the next steps for further processing of this cause.
 
-Attached Documents:
-- Verification Letter by GS Officer: ${cause.gsVerificationPDF ? `http://localhost:5000${cause.gsVerificationPDF}` : "Not available"}
-
 Thank you for your attention.
 
 Best regards,
