@@ -34,8 +34,9 @@ const role = res.data.user.role;
       setTimeout(() => {
         if (user.role === "creator") navigate("/creator/creator-dashboard");
         else if (user.role === "admin") navigate("/admin/admin-dashboard");
-        else if(user.role === "gs") navigate("/gs/gs-dashboard");
-        else if(user.role === "ds") navigate("/ds/ds-dashboard");
+        else if (user.role === "gs") navigate("/gs/gs-dashboard");
+        else if (user.role === "ds") navigate("/ds/ds-dashboard");
+        else if (user.role === "donor") navigate("/donor/dashboard");
         else navigate("/");
       }, 1200);
     } catch (err) {

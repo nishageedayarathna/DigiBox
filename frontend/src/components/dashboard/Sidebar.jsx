@@ -8,7 +8,6 @@ import {
   FaUserShield,
   FaSignOutAlt,
   FaUsers,
-  FaPeopleCarry,
   FaClipboardList,
 } from "react-icons/fa";
 
@@ -24,8 +23,9 @@ const Sidebar = ({ role = "creator" }) => {
 
     donor: [
       { path: "/donor/dashboard", label: "Dashboard", icon: <FaHome /> },
-      { path: "/donor/causes", label: "Available Causes", icon: <FaChartBar /> },
-      { path: "/donor/my-donations", label: "My Donations", icon: <FaList /> },
+      { path: "/donor/browse-causes", label: "Browse Causes", icon: <FaList /> },
+      { path: "/donor/completed-causes", label: "Completed Causes", icon: <FaChartBar /> },
+      { path: "/donor/donation-history", label: "Donation History", icon: <FaClipboardList /> },
     ],
 
     // Sidebar.jsx (admin menu)
