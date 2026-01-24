@@ -38,8 +38,8 @@ const causeSchema = new mongoose.Schema(
     publishedAt: { type: Date },
     publishedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
-    fundsRaised: { type: Number, default: 0, },
-    donorsCount: { type: Number, default: 0, },
+    fundsRaised: { type: Number, default: 0 },
+    donorsCount: { type: Number, default: 0 },
     category: { type: String, enum: ["Health", "Education", "Disaster", "Poverty", "Environment","Other"], default: "Other" },
     image: { type: String, default: "" },
 

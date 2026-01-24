@@ -72,7 +72,11 @@ router.get("/causes", protect, authorize("donor"), async (req, res) => {
 
     let query = {
       isPublished: true,
-      isCompleted: false
+      isCompleted: false,
+      adminStatus: "approved",
+      gsStatus: "approved",
+      dsStatus: "approved",
+      finalStatus: "approved"
     };
 
     if (category && category !== "All") {
@@ -99,7 +103,11 @@ router.get("/causes/completed", protect, authorize("donor"), async (req, res) =>
   try {
     const causes = await Cause.find({
       isPublished: true,
-      isCompleted: true
+      isCompleted: true,
+      adminStatus: "approved",
+      gsStatus: "approved",
+      dsStatus: "approved",
+      finalStatus: "approved"
     }).sort({ updatedAt: -1 });
 
     res.json(causes.map(assignCauseImage));
@@ -115,7 +123,7 @@ router.get("/causes/:id", protect, authorize("donor"), async (req, res) => {
   try {
     const cause = await Cause.findById(req.params.id);
 
-    if (!cause || !cause.isPublished) {
+    if (!cause || !cause.isPublished || cause.adminStatus !== "approved" || cause.gsStatus !== "approved" || cause.dsStatus !== "approved" || cause.finalStatus !== "approved") {
       return res.status(404).json({ message: "Cause not found" });
     }
 
