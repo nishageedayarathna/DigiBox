@@ -37,6 +37,14 @@ const causeSchema = new mongoose.Schema(
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
     publishedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+
+    fundsRaised: { type: Number, default: 0, },
+    donorsCount: { type: Number, default: 0, },
+    category: { type: String, enum: ["Health", "Education", "Disaster", "Poverty", "Environment","Other"], default: "Other" },
+    image: { type: String, default: "" },
+
+    isCompleted: { type: Boolean, default: false },
+
   },
   { timestamps: true }
 );
