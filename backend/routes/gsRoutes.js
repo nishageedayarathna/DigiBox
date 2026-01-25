@@ -211,12 +211,90 @@ router.put("/reject/:id", protect, authorize("gs"), async (req, res) => {
     if (!cause) return res.status(404).json({ message: "Cause not found" });
 
     cause.gsStatus = "rejected";
+    cause.finalStatus = "rejected";
     cause.rejectionReason = reason;
     await cause.save();
 
+    // Send rejection email to creator
+    try {
+      const rejectionEmail = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cause Rejected - GS Review</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #dc3545, #c82333); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+    .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+    .rejection-notice { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 20px; border-radius: 5px; margin: 20px 0; }
+    .reason-box { background: white; padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0; }
+    .officer-info { background: #e9ecef; padding: 10px; border-radius: 3px; margin: 15px 0; }
+    .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⚠️ Cause Rejected - GS Review</h1>
+      <p>Your cause was not approved at the Grama Niladhari level</p>
+    </div>
+
+    <div class="content">
+      <p>Hello <strong>${cause.creator.username}</strong>,</p>
+
+      <div class="rejection-notice">
+        <h3>❌ GS Rejection Notice</h3>
+        <p>Your cause "<strong>${cause.title}</strong>" has been reviewed by the Grama Niladhari Officer and was not approved for further processing.</p>
+      </div>
+
+      <div class="officer-info">
+        <strong>Reviewed by:</strong> ${req.user.username} (GS Officer)<br>
+        <strong>Area:</strong> ${req.user.areaName}<br>
+        <strong>Division:</strong> ${req.user.divisionName}, ${req.user.districtName}
+      </div>
+
+      <div class="reason-box">
+        <h4>Reason for Rejection:</h4>
+        <p><em>${reason}</em></p>
+      </div>
+
+      <p><strong>What you can do next:</strong></p>
+      <ul>
+        <li>Review the GS officer's feedback</li>
+        <li>Address the specific concerns mentioned</li>
+        <li>Consider reapplying with corrected information</li>
+        <li>Contact your local GS office for clarification if needed</li>
+      </ul>
+
+      <p>Please note that GS rejections are final for the current submission. You may submit a new cause application after addressing the issues.</p>
+
+      <div class="footer">
+        <p>Best regards,<br><strong>DigiBox GS Review Team</strong></p>
+        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+          This is an automated email. Please do not reply to this message.
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+      await sendEmail(
+        cause.creator.email,
+        "❌ Cause Rejected - GS Review - DigiBox",
+        `Hello ${cause.creator.username},\n\nYour cause "${cause.title}" has been rejected by the GS Officer (${req.user.username}).\n\nReason: ${reason}\n\nArea: ${req.user.areaName}\nDivision: ${req.user.divisionName}\n\nPlease review the feedback and consider reapplying.\n\nBest regards,\nDigiBox GS Team`,
+        rejectionEmail
+      );
+    } catch (emailError) {
+      console.error("Failed to send GS rejection email:", emailError);
+    }
+
+    // Notify admins
     const admins = await User.find({ role: "admin" });
     for (const admin of admins) {
-      await sendEmail(admin.email, "Cause Rejected by GS", `Cause "${cause.title}" rejected.\nReason: ${reason}`);
+      await sendEmail(admin.email, "Cause Rejected by GS", `Cause "${cause.title}" rejected by GS Officer ${req.user.username}.\nReason: ${reason}`);
     }
 
     res.json({ message: "Cause rejected successfully" });
@@ -253,6 +331,26 @@ router.get("/documents", protect, authorize("gs"), async (req, res) => {
     res.json(docs);
   } catch (err) {
     res.status(500).json({ message: "Error fetching documents" });
+  }
+});
+
+/* ---------------- GET ALL CAUSES FOR GS ---------------- */
+router.get("/all-causes", protect, authorize("gs"), async (req, res) => {
+  try {
+    const { status } = req.query;
+    let query = { areaCode: req.user.areaCode };
+
+    if (status === "pending") query.gsStatus = "pending";
+    if (status === "approved") query.gsStatus = "approved";
+    if (status === "rejected") query.gsStatus = "rejected";
+
+    const causes = await Cause.find(query)
+      .populate("creator", "username email")
+      .sort({ createdAt: -1 });
+
+    res.json(causes);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching all causes" });
   }
 });
 

@@ -38,6 +38,7 @@ router.post("/create", protect, authorize("creator"), upload.single("evidenceFil
       creator: req.user._id,
       title: req.body.title,
       description: req.body.description,
+      category: req.body.category,
       requiredAmount: Number(req.body.requiredAmount),
       beneficiaryName: req.body.beneficiaryName,
       beneficiaryContact: req.body.beneficiaryContact,

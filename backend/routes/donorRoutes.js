@@ -35,7 +35,7 @@ const calculateBadge = (total) => {
 };
 
 /* ======================================================
-   1. DONOR DASHBOARD SUMMARY
+   1. DASHBOARD SUMMARY
 ====================================================== */
 router.get("/summary", protect, authorize("donor"), async (req, res) => {
   try {
@@ -87,7 +87,7 @@ router.get("/causes", protect, authorize("donor"), async (req, res) => {
       query.title = { $regex: search, $options: "i" };
     }
 
-    const causes = await Cause.find(query).sort({ createdAt: -1 });
+    const causes = await Cause.find(query).populate("creator", "username email").sort({ createdAt: -1 });
     const updatedCauses = causes.map(assignCauseImage);
 
     res.json(updatedCauses);
@@ -108,7 +108,7 @@ router.get("/causes/completed", protect, authorize("donor"), async (req, res) =>
       gsStatus: "approved",
       dsStatus: "approved",
       finalStatus: "approved"
-    }).sort({ updatedAt: -1 });
+    }).populate("creator", "username email").sort({ updatedAt: -1 });
 
     res.json(causes.map(assignCauseImage));
   } catch (err) {
@@ -121,7 +121,7 @@ router.get("/causes/completed", protect, authorize("donor"), async (req, res) =>
 ====================================================== */
 router.get("/causes/:id", protect, authorize("donor"), async (req, res) => {
   try {
-    const cause = await Cause.findById(req.params.id);
+    const cause = await Cause.findById(req.params.id).populate("creator", "username email");
 
     if (!cause || !cause.isPublished || cause.adminStatus !== "approved" || cause.gsStatus !== "approved" || cause.dsStatus !== "approved" || cause.finalStatus !== "approved") {
       return res.status(404).json({ message: "Cause not found" });
@@ -173,25 +173,84 @@ router.post("/donate/:causeId", protect, authorize("donor"), async (req, res) =>
 
     await cause.save();
 
-    // Email confirmation
-    await sendEmail(
-      req.user.email,
-      "Thank You for Your Donation – DigiBox",
-      `
-Hello ${req.user.username},
+    // Send email confirmation asynchronously (don't block response)
+    setImmediate(async () => {
+      try {
+        const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Donation Confirmation - DigiBox</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #26bfef, #0a6c8b); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+    .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
+    .receipt { background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #26bfef; margin: 20px 0; }
+    .amount { font-size: 24px; font-weight: bold; color: #26bfef; }
+    .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+    .highlight { background: #e3f2fd; padding: 15px; border-radius: 5px; margin: 15px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎉 Thank You for Your Donation!</h1>
+      <p>Your generosity makes a real difference</p>
+    </div>
 
-Thank you for supporting DigiBox.
+    <div class="content">
+      <p>Hello <strong>${req.user.username}</strong>,</p>
 
-Cause: ${cause.title}
-Amount Donated: LKR ${amount}
-Transaction ID: ${transactionId}
+      <p>Thank you for supporting our community through DigiBox. Your donation has been processed successfully.</p>
 
-Your contribution makes a real difference.
+      <div class="receipt">
+        <h3>📄 Donation Receipt</h3>
+        <div class="highlight">
+          <p><strong>Cause:</strong> ${cause.title}</p>
+          <p><strong>Amount Donated:</strong> <span class="amount">LKR ${amount.toLocaleString()}</span></p>
+          <p><strong>Transaction ID:</strong> ${transactionId}</p>
+          <p><strong>Date:</strong> ${new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}</p>
+          <p><strong>Payment Method:</strong> ${paymentMethod}</p>
+        </div>
+      </div>
 
-Best regards,
-DigiBox Donation Platform
-`
-    );
+      <div class="highlight">
+        <h4>💝 Your Impact</h4>
+        <p>Your donation helps us continue our mission to support communities in need. Every contribution, no matter the size, creates meaningful change.</p>
+      </div>
+
+      <p>If you have any questions about your donation, please don't hesitate to contact our support team.</p>
+
+      <div class="footer">
+        <p>Best regards,<br><strong>DigiBox Donation Platform Team</strong></p>
+        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+          This is an automated email. Please do not reply to this message.
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+        await sendEmail(
+          req.user.email,
+          "🎉 Thank You for Your Donation - DigiBox",
+          `Hello ${req.user.username},\n\nThank you for your donation of LKR ${amount} to "${cause.title}".\nTransaction ID: ${transactionId}\n\nYour support makes a real difference!\n\nBest regards,\nDigiBox Team`,
+          htmlContent
+        );
+      } catch (emailError) {
+        console.error("Failed to send donation confirmation email:", emailError);
+        // Note: We don't fail the donation if email fails
+      }
+    });
 
     res.status(201).json({
       message: "Donation successful",

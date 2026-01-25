@@ -215,12 +215,92 @@ router.put("/reject/:id", protect, authorize("ds"), async (req, res) => {
     cause.rejectionReason = reason;
     await cause.save();
 
+    // Send rejection email to creator
+    try {
+      const creator = await User.findById(cause.creator);
+      if (creator) {
+        const rejectionEmail = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cause Rejected - DS Review</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #dc3545, #c82333); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+    .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+    .rejection-notice { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 20px; border-radius: 5px; margin: 20px 0; }
+    .reason-box { background: white; padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0; }
+    .officer-info { background: #e9ecef; padding: 10px; border-radius: 3px; margin: 15px 0; }
+    .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⚠️ Cause Rejected - DS Review</h1>
+      <p>Your cause was not approved at the Divisional level</p>
+    </div>
+
+    <div class="content">
+      <p>Hello <strong>${creator.username}</strong>,</p>
+
+      <div class="rejection-notice">
+        <h3>❌ DS Rejection Notice</h3>
+        <p>Your cause "<strong>${cause.title}</strong>" has been reviewed by the Divisional Secretary and was not approved for publication.</p>
+      </div>
+
+      <div class="officer-info">
+        <strong>Reviewed by:</strong> ${req.user.username} (Divisional Secretary)<br>
+        <strong>Division:</strong> ${req.user.divisionName}<br>
+        <strong>District:</strong> ${req.user.districtName}
+      </div>
+
+      <div class="reason-box">
+        <h4>Reason for Rejection:</h4>
+        <p><em>${reason}</em></p>
+      </div>
+
+      <p><strong>What this means:</strong></p>
+      <ul>
+        <li>This cause has completed the full review process</li>
+        <li>The rejection is final for this submission</li>
+        <li>You may submit a new cause application</li>
+        <li>Consider the feedback for future submissions</li>
+      </ul>
+
+      <p>If you need clarification about the rejection or have questions about the DigiBox process, please contact your local Divisional Secretariat.</p>
+
+      <div class="footer">
+        <p>Best regards,<br><strong>DigiBox DS Review Team</strong></p>
+        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+          This is an automated email. Please do not reply to this message.
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+        await sendEmail(
+          creator.email,
+          "❌ Cause Rejected - DS Review - DigiBox",
+          `Hello ${creator.username},\n\nYour cause "${cause.title}" has been rejected by the Divisional Secretary (${req.user.username}).\n\nReason: ${reason}\n\nDivision: ${req.user.divisionName}\nDistrict: ${req.user.districtName}\n\nThis completes the review process for this cause.\n\nBest regards,\nDigiBox DS Team`,
+          rejectionEmail
+        );
+      }
+    } catch (emailError) {
+      console.error("Failed to send DS rejection email:", emailError);
+    }
+
+    // Notify admins
     const admins = await User.find({ role: "admin" });
     for (const admin of admins) {
       await sendEmail(
         admin.email,
         "Cause Rejected by DS",
-        `Cause "${cause.title}" rejected.\nReason: ${reason}`
+        `Cause "${cause.title}" rejected by DS Officer ${req.user.username}.\nReason: ${reason}`
       );
     }
 
@@ -273,5 +353,25 @@ router.get("/documents", protect, authorize("ds"), async (req, res) => {
   }
 });
 
+/* ---------------- GET ALL CAUSES FOR DS ---------------- */
+router.get("/all-causes", protect, authorize("ds"), async (req, res) => {
+  try {
+    const { status } = req.query;
+    let query = { divisionCode: req.user.divisionCode };
+
+    if (status === "pending") query.dsStatus = "pending";
+    if (status === "approved") query.dsStatus = "approved";
+    if (status === "rejected") query.dsStatus = "rejected";
+
+    const causes = await Cause.find(query)
+      .populate("creator", "username email")
+      .populate("gsOfficer", "username")
+      .sort({ createdAt: -1 });
+
+    res.json(causes);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching all causes" });
+  }
+});
 
 module.exports = router;

@@ -307,9 +307,88 @@ router.put("/causes/:id/admin-action", protect, authorize("admin"), async (req, 
     if (!cause) return res.status(404).json({ message: "Cause not found" });
 
     if (action === "reject") {
+      const { reason } = req.body;
+      if (!reason) return res.status(400).json({ message: "Rejection reason is required" });
+
       cause.adminStatus = "rejected";
       cause.gsStatus = "rejected";
+      cause.finalStatus = "rejected";
+      cause.rejectionReason = reason;
       await cause.save();
+
+      // Send rejection email to creator
+      try {
+        const creator = await User.findById(cause.creator);
+        if (creator) {
+          const rejectionEmail = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cause Rejected - DigiBox</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #dc3545, #c82333); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+    .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+    .rejection-notice { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 20px; border-radius: 5px; margin: 20px 0; }
+    .reason-box { background: white; padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0; }
+    .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⚠️ Cause Rejected</h1>
+      <p>Your cause submission was not approved</p>
+    </div>
+
+    <div class="content">
+      <p>Hello <strong>${creator.username}</strong>,</p>
+
+      <div class="rejection-notice">
+        <h3>❌ Rejection Notice</h3>
+        <p>Your cause "<strong>${cause.title}</strong>" has been rejected during the initial admin review.</p>
+      </div>
+
+      <div class="reason-box">
+        <h4>Reason for Rejection:</h4>
+        <p><em>${reason}</em></p>
+      </div>
+
+      <p><strong>What you can do next:</strong></p>
+      <ul>
+        <li>Review the rejection reason carefully</li>
+        <li>Address the issues mentioned</li>
+        <li>Make necessary corrections to your cause details</li>
+        <li>Submit a new cause application with the improvements</li>
+      </ul>
+
+      <p>If you believe this rejection was made in error or need clarification, please contact the DigiBox support team.</p>
+
+      <div class="footer">
+        <p>Best regards,<br><strong>DigiBox Admin Team</strong></p>
+        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+          This is an automated email. Please do not reply to this message.
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+          await sendEmail(
+            creator.email,
+            "❌ Cause Rejected - DigiBox",
+            `Hello ${creator.username},\n\nYour cause "${cause.title}" has been rejected.\n\nReason: ${reason}\n\nPlease review the reason and consider submitting an improved application.\n\nBest regards,\nDigiBox Admin Team`,
+            rejectionEmail
+          );
+        }
+      } catch (emailError) {
+        console.error("Failed to send rejection email:", emailError);
+        // Don't fail the rejection if email fails
+      }
+
       return res.json({ message: "Cause rejected by admin", cause });
     }
 

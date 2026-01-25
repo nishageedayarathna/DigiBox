@@ -2,10 +2,10 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
+const sendEmail = require("../utils/email");
 
 const router = express.Router();
 const { protect, authorize } = require("../middleware/authMiddleware");
-
 
 // Signup
 router.post("/signup", async (req, res) => {
@@ -36,7 +36,83 @@ router.post("/signup", async (req, res) => {
       password: hashed,
     });
 
-    res.status(201).json({ message: "User registered successfully" });
+    // Send welcome email asynchronously
+    setImmediate(async () => {
+      try {
+        const welcomeHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Welcome to DigiBox!</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #26bfef, #0a6c8b); color: white; padding: 40px; text-align: center; border-radius: 10px 10px 0 0; }
+    .content { background: #f9f9f9; padding: 40px; border-radius: 0 0 10px 10px; }
+    .welcome-message { background: white; padding: 30px; border-radius: 8px; border-left: 4px solid #26bfef; margin: 20px 0; }
+    .role-badge { display: inline-block; background: #26bfef; color: white; padding: 8px 16px; border-radius: 20px; font-weight: bold; }
+    .cta-button { display: inline-block; background: #26bfef; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+    .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎉 Welcome to DigiBox!</h1>
+      <p>Your journey to making a difference starts here</p>
+    </div>
+
+    <div class="content">
+      <div class="welcome-message">
+        <h2>Hello <strong>${username}</strong>!</h2>
+        <p>Welcome to the DigiBox Donation Platform! We're thrilled to have you join our community of changemakers.</p>
+
+        <p><strong>Your Role:</strong> <span class="role-badge">${role.toUpperCase()}</span></p>
+
+        <p>As a ${role}, you can:</p>
+        <ul>
+          ${role === 'donor' ?
+            `<li>💝 Browse and support meaningful causes</li>
+             <li>📊 Track your donation impact</li>
+             <li>🏆 Earn badges for your generosity</li>` :
+            `<li>📝 Create and manage donation causes</li>
+             <li>📈 Track fundraising progress</li>
+             <li>📊 View detailed analytics</li>`
+          }
+        </ul>
+      </div>
+
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="http://localhost:3000/login" class="cta-button">Get Started Now →</a>
+      </div>
+
+      <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
+
+      <div class="footer">
+        <p>Best regards,<br><strong>DigiBox Team</strong></p>
+        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+          This is an automated email. Please do not reply to this message.
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+        await sendEmail(
+          email,
+          "🎉 Welcome to DigiBox - Your Account is Ready!",
+          `Hello ${username},\n\nWelcome to DigiBox! Your ${role} account has been created successfully.\n\nYou can now log in and start making a difference in our community.\n\nBest regards,\nDigiBox Team`,
+          welcomeHtml
+        );
+      } catch (emailError) {
+        console.error("Failed to send welcome email:", emailError);
+        // Note: We don't fail registration if email fails
+      }
+    });
+
+    res.status(201).json({ message: "User registered successfully. Welcome email sent!" });
   } catch (err) {
     res.status(500).json({ message: "Signup error", error: err.message });
   }
