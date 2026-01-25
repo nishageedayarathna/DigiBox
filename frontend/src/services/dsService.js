@@ -20,3 +20,7 @@ export const approveDSCause = (id, data) => API.put(`/approve/${id}`, data);
 export const rejectDSCause = (id, reason) => API.put(`/reject/${id}`, { reason });
 export const resetDSPassword = (newPassword) => API.put("/reset-password", { newPassword });
 export const fetchDSDocuments = () => API.get("/documents");
+export const fetchDSAllCauses = (status = "all") => {
+  const params = status !== "all" ? { status } : {};
+  return API.get(`/all-causes?${new URLSearchParams(params)}`);
+};

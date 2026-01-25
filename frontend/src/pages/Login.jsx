@@ -29,7 +29,7 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(user));
 
       setSuccess("Login successful!");
-const role = res.data.user.role;
+
       // ✅ Redirect based on role
       setTimeout(() => {
         if (user.role === "creator") navigate("/creator/creator-dashboard");
@@ -76,6 +76,7 @@ const role = res.data.user.role;
             Sign Up
           </Link>
         </p>
+
       </FormCard>
     </div>
   );

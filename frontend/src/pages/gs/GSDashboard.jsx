@@ -11,6 +11,9 @@ const GSDashboard = () => {
   const [monthlyAnalytics, setMonthlyAnalytics] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [allCauses, setAllCauses] = useState([]);
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [causesLoading, setCausesLoading] = useState(false);
 
   useEffect(() => {
     fetchGSDashboard()
@@ -42,7 +45,41 @@ const GSDashboard = () => {
         console.error(err);
         setLoading(false);
       });
+
+    fetchAllCauses();
   }, []);
+
+  const fetchAllCauses = async (status = "all") => {
+    setCausesLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const params = status !== "all" ? { status } : {};
+      const res = await fetch(`http://localhost:5000/api/gs/all-causes?${new URLSearchParams(params)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setAllCauses(data);
+    } catch (err) {
+      console.error("Failed to fetch causes:", err);
+    } finally {
+      setCausesLoading(false);
+    }
+  };
+
+  const handleFilterChange = (status) => {
+    setFilterStatus(status);
+    fetchAllCauses(status);
+  };
+
+  const getStatusBadge = (cause) => {
+    if (cause.gsStatus === "rejected") {
+      return <span className="px-2 py-1 bg-red-600 text-white text-xs rounded">Rejected</span>;
+    }
+    if (cause.gsStatus === "approved") {
+      return <span className="px-2 py-1 bg-green-600 text-white text-xs rounded">Approved</span>;
+    }
+    return <span className="px-2 py-1 bg-yellow-600 text-white text-xs rounded">Pending Review</span>;
+  };
 
   // Safe loading
   if (loading || !user || !area || !stats) {
@@ -84,7 +121,7 @@ const GSDashboard = () => {
         </div>
 
         {/* Monthly Analytics Chart */}
-        <div className="bg-[#1F2937] p-6 rounded-xl shadow">
+        <div className="bg-[#1F2937] p-6 rounded-xl shadow mb-8">
           <h2 className="text-lg font-semibold text-[#26bfef] mb-4">Monthly Verification Stats</h2>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={monthlyAnalytics}>
@@ -97,6 +134,54 @@ const GSDashboard = () => {
               <Bar dataKey="rejected" fill="#EF4444" />
             </BarChart>
           </ResponsiveContainer>
+        </div>
+
+        {/* RECEIVED CAUSES */}
+        <div className="bg-[#1F2937] p-6 rounded-xl shadow">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl text-[#26bfef]">Received Causes</h2>
+            <div className="flex gap-2">
+              {["all", "pending", "approved", "rejected"].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => handleFilterChange(status)}
+                  className={`px-4 py-2 rounded text-sm ${
+                    filterStatus === status
+                      ? "bg-[#26bfef] text-white"
+                      : "bg-gray-600 hover:bg-gray-700 text-white"
+                  }`}
+                >
+                  {status === "all" ? "All" : status.charAt(0).toUpperCase() + status.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {causesLoading ? (
+            <p className="text-center py-4">Loading causes...</p>
+          ) : allCauses.length === 0 ? (
+            <p className="text-center py-4 text-gray-400">No causes found</p>
+          ) : (
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {allCauses.map((cause) => (
+                <div key={cause._id} className="bg-[#374151] p-4 rounded-lg">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="font-semibold text-[#26bfef]">{cause.title}</h3>
+                    {getStatusBadge(cause)}
+                  </div>
+                  <p className="text-sm text-gray-300 mb-2">{cause.description.substring(0, 100)}...</p>
+                  <div className="flex justify-between text-xs text-gray-400">
+                    <span>By: {cause.creator?.username}</span>
+                    <span>{new Date(cause.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <div className="mt-2 text-xs text-gray-500">
+                    Amount: LKR {cause.requiredAmount.toLocaleString()} |
+                    Area: {cause.areaName}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </main>
     </div>

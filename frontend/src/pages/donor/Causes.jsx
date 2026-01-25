@@ -3,6 +3,19 @@ import Sidebar from "../../components/dashboard/Sidebar";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
+// Category to image mapping
+const getCategoryImage = (category) => {
+  const categoryImages = {
+    Health: "/assets/images/health.jpg",
+    Education: "/assets/images/education.jpg",
+    Disaster: "/assets/images/disaster.jpg",
+    Poverty: "/assets/images/poverty.jpg",
+    Environment: "/assets/images/environment.jpg",
+    Other: "/assets/images/default.jpg"
+  };
+  return categoryImages[category] || categoryImages.Other;
+};
+
 const Causes = () => {
   const [causes, setCauses] = useState([]);
 
@@ -32,9 +45,12 @@ const Causes = () => {
           {causes.map((cause) => (
             <div key={cause._id} className="bg-[#1F2937] p-4 rounded-xl">
               <img
-                src={cause.image}
+                src={cause.image || getCategoryImage(cause.category)}
                 alt={cause.title}
                 className="h-40 w-full object-cover rounded mb-3"
+                onError={(e) => {
+                  e.target.src = "/assets/images/default.jpg";
+                }}
               />
               <h2 className="font-semibold">{cause.title}</h2>
               <p className="text-sm text-gray-400">{cause.category}</p>

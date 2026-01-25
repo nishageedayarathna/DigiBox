@@ -11,6 +11,7 @@ const CreateCause = () => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    category: "",
     requiredAmount: "",
     beneficiaryName: "",
     beneficiaryContact: "",
@@ -25,6 +26,7 @@ const CreateCause = () => {
   const [evidence, setEvidence] = useState(null);
   const [hierarchy, setHierarchy] = useState({});
   const [loadingHierarchy, setLoadingHierarchy] = useState(true);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedDivision, setSelectedDivision] = useState("");
@@ -62,6 +64,7 @@ const CreateCause = () => {
     title: (v) => (v.length >= 10 ? "" : "Title must be at least 10 characters."),
     description: (v) =>
       v.length >= 30 ? "" : "Description must be at least 30 characters.",
+    category: (v) => (v ? "" : "Please select a category."),
     requiredAmount: (v) =>
       v >= 1000 ? "" : "Required amount must be at least LKR 1,000.",
     beneficiaryName: (v) =>
@@ -146,12 +149,14 @@ const CreateCause = () => {
         },
       });
 
-      alert("Cause submitted successfully!");
+      // Show success message and reset form completely
+      setSuccessMessage("✅ Cause submitted successfully! Form is ready for your next cause.");
 
-      // Reset form
+      // Reset form completely for new cause creation
       setFormData({
         title: "",
         description: "",
+        category: "",
         requiredAmount: "",
         beneficiaryName: "",
         beneficiaryContact: "",
@@ -165,6 +170,15 @@ const CreateCause = () => {
       setErrors({});
       setSelectedDistrict("");
       setSelectedDivision("");
+
+      // Clear file input
+      const fileInput = document.querySelector('input[type="file"]');
+      if (fileInput) fileInput.value = "";
+
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
     } catch (err) {
       alert(err.response?.data?.message || "Error submitting cause");
     }
@@ -186,6 +200,11 @@ const CreateCause = () => {
         </h1>
 
         <div className="bg-[#1F2937] p-8 rounded-2xl shadow-lg max-w-3xl mx-auto">
+          {successMessage && (
+            <div className="mb-6 p-4 bg-green-600 text-white rounded-lg text-center font-semibold">
+              {successMessage}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-6">
 
             {/* TITLE */}
@@ -211,6 +230,26 @@ const CreateCause = () => {
                 className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg"
               />
               {renderError(errors.description)}
+            </div>
+
+            {/* CATEGORY */}
+            <div>
+              <label>Category</label>
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg"
+              >
+                <option value="">Select a category</option>
+                <option value="Health">Health</option>
+                <option value="Education">Education</option>
+                <option value="Disaster">Disaster</option>
+                <option value="Poverty">Poverty</option>
+                <option value="Environment">Environment</option>
+                <option value="Other">Other</option>
+              </select>
+              {renderError(errors.category)}
             </div>
 
             {/* AMOUNT */}

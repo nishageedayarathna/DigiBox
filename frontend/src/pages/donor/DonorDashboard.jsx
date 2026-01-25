@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/dashboard/Sidebar";
 import StatCard from "../../components/dashboard/StatCard";
 import axios from "axios";
+import { toast } from "react-hot-toast";
 
 // Skeleton Loader Component
 const SkeletonLoader = ({ className }) => (

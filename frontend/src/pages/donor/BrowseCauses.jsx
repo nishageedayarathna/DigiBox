@@ -4,6 +4,19 @@ import Sidebar from "../../components/dashboard/Sidebar";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
+// Category to image mapping
+const getCategoryImage = (category) => {
+  const categoryImages = {
+    Health: "/assets/images/health.jpg",
+    Education: "/assets/images/education.jpg",
+    Disaster: "/assets/images/disaster.jpg",
+    Poverty: "/assets/images/poverty.jpg",
+    Environment: "/assets/images/environment.jpg",
+    Other: "/assets/images/default.jpg"
+  };
+  return categoryImages[category] || categoryImages.Other;
+};
+
 // Skeleton Loader Component
 const CauseCardSkeleton = () => (
   <div className="bg-[#1F2937] p-6 rounded-xl animate-pulse">
@@ -185,7 +198,7 @@ const BrowseCauses = () => {
                 {/* Cause Image */}
                 <div className="h-48 bg-gray-700 relative overflow-hidden">
                   <img
-                    src={`http://localhost:5000${cause.image}`}
+                    src={cause.image || getCategoryImage(cause.category)}
                     alt={cause.title}
                     className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                     onError={(e) => {

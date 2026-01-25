@@ -4,6 +4,19 @@ import Sidebar from "../../components/dashboard/Sidebar";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
+// Category to image mapping
+const getCategoryImage = (category) => {
+  const categoryImages = {
+    Health: "/assets/images/health.jpg",
+    Education: "/assets/images/education.jpg",
+    Disaster: "/assets/images/disaster.jpg",
+    Poverty: "/assets/images/poverty.jpg",
+    Environment: "/assets/images/environment.jpg",
+    Other: "/assets/images/default.jpg"
+  };
+  return categoryImages[category] || categoryImages.Other;
+};
+
 // Skeleton Loader Component
 const DonateSkeleton = () => (
   <div className="animate-pulse">
@@ -133,7 +146,7 @@ const Donate = () => {
 
       setReceipt(res.data.receipt);
       setShowThankYou(true);
-      toast.success("Donation successful!");
+      toast.success("Donation successful! A confirmation email has been sent to your inbox.");
 
       // Refresh cause data
       fetchCauseDetails();
@@ -244,7 +257,7 @@ const Donate = () => {
             <div className="bg-[#1F2937] p-6 rounded-xl">
               <div className="flex items-start space-x-4">
                 <img
-                  src={`http://localhost:5000${cause.image}`}
+                  src={cause.image || getCategoryImage(cause.category)}
                   alt={cause.title}
                   className="w-20 h-20 object-cover rounded-lg"
                   onError={(e) => {
@@ -424,6 +437,7 @@ const Donate = () => {
                 <div className="text-6xl mb-4">🎉</div>
                 <h2 className="text-2xl font-bold text-[#26bfef] mb-2">Thank You!</h2>
                 <p className="text-gray-300">Your donation has been processed successfully.</p>
+                <p className="text-sm text-gray-400 mt-2">📧 A confirmation email has been sent to your inbox.</p>
               </div>
 
               <div className="bg-[#111827] p-4 rounded-lg mb-6">
