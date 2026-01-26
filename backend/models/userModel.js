@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema(
 
     password: { type: String, required: true },
     mustResetPassword: { type: Boolean, default: false },
+    profileImage: { type: String, default: "" }, // Profile image URL or base64
   },
   { timestamps: true }
 );

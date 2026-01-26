@@ -9,6 +9,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const gsRoutes = require("./routes/gsRoutes");
 const dsRoutes = require("./routes/dsRoutes");
 const donorRoutes = require("./routes/donorRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 const User = require("./models/userModel");
 const bcrypt = require("bcryptjs");
 
@@ -71,6 +72,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/gs", gsRoutes);
 app.use("/api/ds", dsRoutes);
 app.use("/api/donor", donorRoutes);
+app.use("/api/profile", profileRoutes);
 
 
 

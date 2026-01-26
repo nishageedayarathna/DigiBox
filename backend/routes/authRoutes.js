@@ -141,8 +141,31 @@ router.post("/login", async (req, res) => {
       email: user.email,
       role: user.role,
       areaCode: user.areaCode || null,
+      profileImage: user.profileImage || "",
     },
   });
+});
+
+// Get current user - for UserProfileMenu
+router.get("/me", protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    res.json({
+      user: {
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        profileImage: user.profileImage || "",
+      },
+    });
+  } catch (error) {
+    console.error("Get current user error:", error);
+    res.status(500).json({ message: "Failed to fetch user" });
+  }
 });
 
 // POST /api/auth/reset-password
@@ -163,6 +186,128 @@ router.put("/reset-password", protect, async (req, res) => {
   } catch (err) {
     console.error("Reset password error:", err.message);
     res.status(500).json({ message: "Server error resetting password" });
+  }
+});
+
+// Forgot Password - Send reset email
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Generate reset token
+    const resetToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    // Send reset email
+    const resetUrl = `http://localhost:3000/reset-password/${resetToken}`;
+    const resetHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Reset Your Password - DigiBox</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #26bfef, #0a6c8b); color: white; padding: 40px; text-align: center; border-radius: 10px 10px 0 0; }
+    .content { background: #f9f9f9; padding: 40px; border-radius: 0 0 10px 10px; }
+    .reset-message { background: white; padding: 30px; border-radius: 8px; border-left: 4px solid #26bfef; margin: 20px 0; }
+    .cta-button { display: inline-block; background: #26bfef; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+    .footer { text-align: center; margin-top: 30px; color: #666; font-size: 14px; }
+    .warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 5px; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔐 Reset Your Password</h1>
+      <p>We received a request to reset your password</p>
+    </div>
+
+    <div class="content">
+      <div class="reset-message">
+        <h2>Hello <strong>${user.username}</strong>!</h2>
+        <p>You recently requested to reset your password for your DigiBox account. Click the button below to reset it:</p>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetUrl}" class="cta-button">Reset Password →</a>
+        </div>
+
+        <p><strong>This link will expire in 15 minutes</strong> for security reasons.</p>
+
+        <div class="warning">
+          <strong>Security Notice:</strong> If you didn't request this password reset, please ignore this email. Your password will remain unchanged.
+        </div>
+      </div>
+
+      <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
+      <p style="word-break: break-all; background: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace;">${resetUrl}</p>
+
+      <div class="footer">
+        <p>Best regards,<br><strong>DigiBox Team</strong></p>
+        <p style="margin-top: 20px; font-size: 12px; color: #999;">
+          This is an automated email. Please do not reply to this message.
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    await sendEmail(
+      email,
+      "🔐 Reset Your DigiBox Password",
+      `Hello ${user.username},\n\nYou requested a password reset. Click this link to reset your password: ${resetUrl}\n\nThis link expires in 15 minutes.\n\nIf you didn't request this, ignore this email.\n\nBest regards,\nDigiBox Team`,
+      resetHtml
+    );
+
+    res.json({ message: "Password reset email sent successfully" });
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    res.status(500).json({ message: "Failed to send reset email" });
+  }
+});
+
+// Reset Password with Token
+router.post("/reset-password/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword) {
+      return res.status(400).json({ message: "New password is required" });
+    }
+
+    // Verify token
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      return res.status(400).json({ message: "Invalid or expired reset token" });
+    }
+
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Hash new password
+    const hashed = await bcrypt.hash(newPassword, 10);
+    user.password = hashed;
+    await user.save();
+
+    res.json({ message: "Password reset successfully" });
+  } catch (err) {
+    console.error("Reset password with token error:", err);
+    res.status(500).json({ message: "Failed to reset password" });
   }
 });
 
