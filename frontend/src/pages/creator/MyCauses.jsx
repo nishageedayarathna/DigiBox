@@ -31,7 +31,7 @@ const MyCauses = () => {
       <Sidebar role="creator" />
 
       <main className="flex-1 ml-0 md:ml-64 p-8">
-        <h1 className="text-3xl font-bold text-[#26bfef] mb-8">My Causes</h1>
+        <h1 className="text-3xl font-bold text-primary mb-8">My Causes</h1>
 
         {loading ? (
           <p className="text-gray-400">Loading...</p>
@@ -44,7 +44,7 @@ const MyCauses = () => {
                 key={cause._id}
                 className="bg-[#1F2937] p-6 rounded-xl shadow-md border border-gray-700"
               >
-                <h2 className="text-xl font-semibold text-[#26bfef]">
+                <h2 className="text-xl font-semibold text-primary">
                   {cause.title}
                 </h2>
 
@@ -78,7 +78,7 @@ const MyCauses = () => {
                   href={`http://localhost:5000${cause.evidenceFile}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[#26bfef] mt-3 inline-block underline hover:text-[#0a6c8b]"
+                  className="text-primary mt-3 inline-block underline hover:text-secondary"
                 >
                   View Evidence
                 </a> 

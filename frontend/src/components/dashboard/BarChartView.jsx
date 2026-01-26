@@ -21,11 +21,11 @@ const AnalyticsChart = ({ data, showLabels = true }) => {
           <Tooltip
             contentStyle={{
               backgroundColor: "#1F2937",
-              border: "1px solid #26bfef",
+              border: "1px solid #8B5CF6",
               color: "#fff",
             }}
           />
-          <Bar dataKey="causes" fill="#26bfef" radius={[6, 6, 0, 0]}>
+          <Bar dataKey="causes" fill="#8B5CF6" radius={[6, 6, 0, 0]}>
             {showLabels && (
               <LabelList
                 dataKey="causes"

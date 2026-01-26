@@ -46,7 +46,7 @@ const PublishCauses = () => {
       <Sidebar role="admin" />
 
       <main className="flex-1 p-8 md:ml-64">
-        <h1 className="text-2xl font-bold text-[#26bfef] mb-6">
+        <h1 className="text-2xl font-bold text-primary mb-6">
           Publication of Causes
         </h1>
 
@@ -64,7 +64,7 @@ const PublishCauses = () => {
                   className="bg-[#1F2937] rounded-xl shadow-lg p-6 flex flex-col justify-between"
                 >
                   <div>
-                    <h2 className="text-xl font-bold text-[#26bfef] mb-2">
+                    <h2 className="text-xl font-bold text-primary mb-2">
                       {c.title}
                     </h2>
 

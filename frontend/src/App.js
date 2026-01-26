@@ -6,6 +6,8 @@ import Footer from "./components/Footer";
 import LandingPage from "./pages/LandingPage";
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import PasswordReset from "./pages/ResetPassword";
 
 /* Creator */
 import CreatorDashboard from "./pages/creator/CreatorDashboard";
@@ -40,6 +42,9 @@ import CauseDetails from "./pages/donor/CauseDetails";
 import DonationHistory from "./pages/donor/DonationHistory";
 import Donate from "./pages/donor/Donate";
 
+/* Profile */
+import Profile from "./pages/Profile";
+
 const AppContent = () => {
   const location = useLocation();
 
@@ -61,11 +66,14 @@ const AppContent = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<PasswordReset />} />
 
           {/* Creator */}
           <Route path="/creator/creator-dashboard" element={<CreatorDashboard />} />
           <Route path="/creator/create-cause" element={<CreateCause />} />
           <Route path="/creator/causes" element={<MyCauses />} />
+          <Route path="/creator/profile" element={<Profile />} />
 
           {/* Admin */}
           <Route path="/admin/admin-dashboard" element={<AdminDashboard />} />
@@ -74,18 +82,21 @@ const AppContent = () => {
           <Route path="/admin/add-officer" element={<AddOfficer />} />
           <Route path="/admin/structure" element={<AdminStructure />} />
           <Route path="/admin/manage-users" element={<ManageUsers />} />
+          <Route path="/admin/profile" element={<Profile />} />
 
           {/* GS */}
           <Route path="/gs/gs-dashboard" element={<GSDashboard />} />
           <Route path="/gs/gs-pendingcauses" element={<PendingCauses />} />
           <Route path="/gs/gs-documents" element={<Documents />} />
           <Route path="/gs/gs-resetpassword" element={<ResetPassword />} />
+          <Route path="/gs/profile" element={<Profile />} />
 
           {/* DS */}
           <Route path="/ds/ds-dashboard" element={<DSDashboard />} />
           <Route path="/ds/ds-pendingcauses" element={<DSPendingCauses />} />
           <Route path="/ds/ds-documents" element={<DSDocuments />} />
           <Route path="/ds/ds-resetpassword" element={<DSResetPassword />} />
+          <Route path="/ds/profile" element={<Profile />} />
 
           {/* Donor */}
           <Route path="/donor/dashboard" element={<DonorDashboard />} />
@@ -94,6 +105,7 @@ const AppContent = () => {
           <Route path="/donor/cause-details/:id" element={<CauseDetails />} />
           <Route path="/donor/donation-history" element={<DonationHistory />} />
           <Route path="/donor/donate/:causeId" element={<Donate />} />
+          <Route path="/donor/profile" element={<Profile />} />
         </Routes>
       </main>
 

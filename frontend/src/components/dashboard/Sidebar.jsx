@@ -9,6 +9,7 @@ import {
   FaSignOutAlt,
   FaUsers,
   FaClipboardList,
+  FaUserCircle,
 } from "react-icons/fa";
 
 const Sidebar = ({ role = "creator" }) => {
@@ -19,6 +20,7 @@ const Sidebar = ({ role = "creator" }) => {
       { path: "/creator/creator-dashboard", label: "Dashboard", icon: <FaHome /> },
       { path: "/creator/create-cause", label: "Create Cause", icon: <FaPlusCircle /> },
       { path: "/creator/causes", label: "My Causes", icon: <FaList /> },
+      { path: "/creator/profile", label: "Profile", icon: <FaUserCircle /> },
     ],
 
     donor: [
@@ -26,6 +28,7 @@ const Sidebar = ({ role = "creator" }) => {
       { path: "/donor/browse-causes", label: "Browse Causes", icon: <FaList /> },
       { path: "/donor/completed-causes", label: "Completed Causes", icon: <FaChartBar /> },
       { path: "/donor/donation-history", label: "Donation History", icon: <FaClipboardList /> },
+      { path: "/donor/profile", label: "Profile", icon: <FaUserCircle /> },
     ],
 
     // Sidebar.jsx (admin menu)
@@ -35,21 +38,22 @@ const Sidebar = ({ role = "creator" }) => {
   { path: "/admin/approve-causes", label: "Admin Approval", icon: <FaList /> },
   { path: "/admin/publish-causes", label: "Publish Causes", icon: <FaPlusCircle /> }, // Added
   { path: "/admin/add-officer", label: "Add GS / DS", icon: <FaPlusCircle /> },
-  { path: "/admin/structure", label: "Admin Structure", icon: <FaHome /> },
-  { path: "/admin/manage-users", label: "Manage Users", icon: <FaUsers /> },
+  { path: "/admin/profile", label: "Profile", icon: <FaUserCircle /> },
 ],
 // sidebar GS menu
     gs: [
     { path: "/gs/gs-dashboard", label: "Dashboard", icon: <FaHome /> },
     { path: "/gs/gs-pendingcauses", label: "Pending Causes", icon: <FaClipboardList /> },
     { path: "/gs/gs-documents", label: "Documents", icon: <FaList /> },
-    { path: "/gs/gs-resetpassword", label: "Reset Password", icon: <FaUserShield /> },
+    { path: "/gs/profile", label: "Profile", icon: <FaUserCircle /> },
   ],
 
   // ✅ DS MENU (optional but recommended)
     ds: [
   { path: "/ds/ds-dashboard", label: "Dashboard", icon: <FaHome /> },
   { path: "/ds/ds-pendingcauses", label: "Pending Causes", icon: <FaClipboardList /> },
+  { path: "/ds/ds-documents", label: "Documents", icon: <FaList /> },
+  { path: "/ds/profile", label: "Profile", icon: <FaUserCircleist /> },
   { path: "/ds/ds-documents", label: "Documents", icon: <FaList /> },
   { path: "/ds/ds-resetpassword", label: "Reset Password", icon: <FaUserShield /> },
 ],
@@ -65,7 +69,7 @@ const Sidebar = ({ role = "creator" }) => {
   };
 
   return (
-    <aside className="w-64 bg-[#0a2e52] flex flex-col justify-between shadow-lg min-h-screen fixed">
+    <aside className="w-64 bg-dark flex flex-col justify-between shadow-lg min-h-screen fixed">
       
       {/* Top Logo */}
       <div>
@@ -84,11 +88,11 @@ const Sidebar = ({ role = "creator" }) => {
                 to={item.path}
                 className={`flex items-center gap-3 px-6 py-3 transition ${
                   isActive
-                    ? "bg-[#0a6c8b] text-white"
-                    : "hover:bg-[#0a6c8b] text-gray-300"
+                    ? "bg-secondary text-white"
+                    : "hover:bg-secondary text-gray-300"
                 }`}
               >
-                <span className={`text-lg ${isActive ? "text-white" : "text-[#26bfef]"}`}>
+                <span className={`text-lg ${isActive ? "text-white" : "text-primary"}`}>
                   {item.icon}
                 </span>
                 <span>{item.label}</span>

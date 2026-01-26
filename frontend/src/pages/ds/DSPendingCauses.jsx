@@ -104,7 +104,7 @@ const DSPendingCauses = () => {
     <div className="bg-[#111827] min-h-screen text-white flex">
       <Sidebar role="ds" />
       <main className="flex-1 p-8 md:ml-64">
-        <h1 className="text-xl font-semibold text-[#26bfef] mb-6">
+        <h1 className="text-xl font-semibold text-primary mb-6">
           Pending Causes for Approval
         </h1>
 
@@ -112,7 +112,7 @@ const DSPendingCauses = () => {
 
         {causes.map(c => (
           <div key={c._id} className="bg-[#1F2937] rounded-xl p-5 mb-4 shadow">
-            <h2 className="text-lg font-bold text-[#26bfef]">{c.title}</h2>
+            <h2 className="text-lg font-bold text-primary">{c.title}</h2>
             <p className="text-gray-300 my-2">{c.description}</p>
             <p className="text-gray-300"><strong>Beneficiary:</strong> {c.beneficiaryName}</p>
             <p className="text-gray-300"><strong>Amount:</strong> LKR {c.requiredAmount}</p>
@@ -120,7 +120,7 @@ const DSPendingCauses = () => {
 
             <div className="mt-2 flex gap-4">
               {c.evidenceFile && (
-                <a href={`http://localhost:5000${c.evidenceFile}`} target="_blank" rel="noreferrer" className="text-[#26bfef] underline">
+                <a href={`http://localhost:5000${c.evidenceFile}`} target="_blank" rel="noreferrer" className="text-primary underline">
                   Evidence
                 </a>
               )}
@@ -169,7 +169,7 @@ const Modal = ({ title, children, onClose }) => (
   <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
     <div className="bg-[#1F2937] p-6 rounded-xl w-[400px]">
       <div className="flex justify-between mb-4">
-        <h2 className="text-lg font-semibold text-[#26bfef]">{title}</h2>
+        <h2 className="text-lg font-semibold text-primary">{title}</h2>
         <button onClick={onClose} className="text-gray-400">✕</button>
       </div>
       {children}

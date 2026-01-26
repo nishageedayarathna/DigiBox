@@ -46,7 +46,7 @@ const ImageSlider = () => {
               <Link
                 to="/signup"
                 onClick={() => window.scrollTo(0, 0)}
-                className="px-6 py-3 bg-[#26bfef] text-white rounded-full hover:bg-[#0a6c8b] transition"
+                className="px-6 py-3 bg-primary text-white rounded-full hover:bg-primary-dark transition"
               >
                 Get Started
               </Link>

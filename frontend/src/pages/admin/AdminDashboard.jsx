@@ -87,7 +87,7 @@ const AdminDashboard = () => {
       <Sidebar role="admin" />
 
       <main className="ml-64 p-8 w-full">
-        <h1 className="text-3xl font-bold text-[#26bfef] mb-8">
+        <h1 className="text-3xl font-bold text-primary mb-8">
           Admin Dashboard
         </h1>
 
@@ -104,7 +104,7 @@ const AdminDashboard = () => {
 
         {/* PIE CHART */}
         <div className="bg-[#1F2937] p-6 rounded-xl mb-8">
-          <h2 className="text-xl mb-4 text-[#26bfef]">
+          <h2 className="text-xl mb-4 text-primary">
             Cause Approval Distribution
           </h2>
           <PieChartView data={pieData} />
@@ -113,7 +113,7 @@ const AdminDashboard = () => {
         {/* RECEIVED CAUSES */}
         <div className="bg-[#1F2937] p-6 rounded-xl">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl text-[#26bfef]">Received Causes</h2>
+            <h2 className="text-xl text-primary">Received Causes</h2>
             <div className="flex gap-2">
               {["all", "pending", "approved", "rejected"].map((status) => (
                 <button
@@ -121,7 +121,7 @@ const AdminDashboard = () => {
                   onClick={() => handleFilterChange(status)}
                   className={`px-4 py-2 rounded text-sm ${
                     filterStatus === status
-                      ? "bg-[#26bfef] text-white"
+                      ? "bg-primary text-white"
                       : "bg-gray-600 hover:bg-gray-700 text-white"
                   }`}
                 >
@@ -140,7 +140,7 @@ const AdminDashboard = () => {
               {allCauses.map((cause) => (
                 <div key={cause._id} className="bg-[#374151] p-4 rounded-lg">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-[#26bfef]">{cause.title}</h3>
+                    <h3 className="font-semibold text-primary">{cause.title}</h3>
                     {getStatusBadge(cause)}
                   </div>
                   <p className="text-sm text-gray-300 mb-2">{cause.description.substring(0, 100)}...</p>

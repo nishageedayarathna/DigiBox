@@ -87,7 +87,7 @@ const CompletedCauses = () => {
 
       <main className="flex-1 ml-64 p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-[#26bfef]">Completed Causes</h1>
+          <h1 className="text-3xl font-bold text-primary">Completed Causes</h1>
           <button
             onClick={() => navigate("/donor/browse-causes")}
             className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
@@ -98,7 +98,7 @@ const CompletedCauses = () => {
 
         {/* Summary */}
         <div className="bg-[#1F2937] p-6 rounded-xl mb-6">
-          <h2 className="text-xl font-semibold text-[#26bfef] mb-4">Impact Summary</h2>
+          <h2 className="text-xl font-semibold text-primary mb-4">Impact Summary</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-green-400">{causes.length}</p>
@@ -133,7 +133,7 @@ const CompletedCauses = () => {
             <p className="text-gray-400 mb-6">{error}</p>
             <button
               onClick={handleRetry}
-              className="bg-[#26bfef] hover:bg-[#0a6c8b] text-white px-6 py-3 rounded-lg transition-colors"
+              className="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg transition-colors"
             >
               Try Again
             </button>
@@ -147,7 +147,7 @@ const CompletedCauses = () => {
             </p>
             <button
               onClick={() => navigate("/donor/browse-causes")}
-              className="bg-[#26bfef] hover:bg-[#0a6c8b] text-white px-6 py-3 rounded-lg transition-colors"
+              className="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg transition-colors"
             >
               Browse Active Causes
             </button>
@@ -157,7 +157,7 @@ const CompletedCauses = () => {
             {causes.map((cause) => (
               <div
                 key={cause._id}
-                className="bg-[#1F2937] rounded-xl overflow-hidden shadow-lg hover:shadow-[#26bfef]/20 transition-shadow cursor-pointer"
+                className="bg-[#1F2937] rounded-xl overflow-hidden shadow-lg hover:shadow-primary/20 transition-shadow cursor-pointer"
                 onClick={() => viewCauseDetails(cause._id)}
               >
                 {/* Cause Image */}
@@ -176,7 +176,7 @@ const CompletedCauses = () => {
                     </span>
                   </div>
                   <div className="absolute top-3 left-3">
-                    <span className="px-2 py-1 bg-[#26bfef] text-xs font-semibold rounded-full">
+                    <span className="px-2 py-1 bg-primary text-xs font-semibold rounded-full">
                       {cause.category}
                     </span>
                   </div>
@@ -184,7 +184,7 @@ const CompletedCauses = () => {
 
                 {/* Cause Content */}
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-[#26bfef] mb-2 line-clamp-2">
+                  <h3 className="text-xl font-bold text-primary mb-2 line-clamp-2">
                     {cause.title}
                   </h3>
 

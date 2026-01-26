@@ -24,6 +24,15 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Password validation
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      setError("Password must be at least 8 characters long and include at least one uppercase letter, one number, and one symbol.");
+      setSuccess("");
+      return;
+    }
+    
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match!");
       setSuccess("");
@@ -50,8 +59,8 @@ const Signup = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <FormInput label="Full Name" type="text" name="username" value={formData.username} onChange={handleChange} />
           <FormInput label="Email Address" type="email" name="email" value={formData.email} onChange={handleChange} />
-          <FormInput label="Password" type="password" name="password" value={formData.password} onChange={handleChange} />
-          <FormInput label="Confirm Password" type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} />
+          <FormInput label="Password" type="password" name="password" value={formData.password} onChange={handleChange} showPasswordToggle={true} />
+          <FormInput label="Confirm Password" type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} showPasswordToggle={true} />
 
           <div>
             <label className="block text-sm mb-1">Select Role</label>
@@ -59,7 +68,7 @@ const Signup = () => {
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#26bfef]"
+              className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary"
             >
               <option value="donor">Donor</option>
               <option value="creator">Cause Creator</option>
@@ -72,7 +81,7 @@ const Signup = () => {
 
         <p className="text-center text-gray-400 mt-4">
           Already have an account?{" "}
-          <Link to="/login" className="text-[#26bfef] hover:underline">
+          <Link to="/login" className="text-primary hover:underline">
             Login
           </Link>
         </p>

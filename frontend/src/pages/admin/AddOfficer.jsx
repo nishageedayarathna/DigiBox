@@ -87,7 +87,7 @@ const AddOfficer = () => {
       {/* MAIN AREA */}
       <main className="flex-1 md:ml-64 flex items-center justify-center p-6">
         <div className="w-full max-w-md bg-[#1F2937] rounded-2xl shadow-xl p-8">
-          <h1 className="text-2xl font-semibold text-center text-[#26bfef] mb-6">
+          <h1 className="text-2xl font-semibold text-center text-primary mb-6">
             Add GS / DS Officer
           </h1>
 
@@ -116,7 +116,7 @@ const AddOfficer = () => {
                 Role
               </label>
               <select
-                className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#26bfef]"
+                className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary"
                 value={form.role}
                 onChange={(e) =>
                   setForm({ ...form, role: e.target.value })
@@ -187,7 +187,7 @@ const AddOfficer = () => {
 
             <button
               type="submit"
-              className="w-full bg-[#26bfef] hover:bg-[#0a6c8b] transition text-white font-medium py-3 rounded-lg"
+              className="w-full bg-primary hover:bg-secondary transition text-white font-medium py-3 rounded-lg"
             >
               Add Officer
             </button>

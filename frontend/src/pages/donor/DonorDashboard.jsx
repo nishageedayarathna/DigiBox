@@ -93,7 +93,7 @@ const DonorDashboard = () => {
             <p className="text-gray-400 mb-6">{error}</p>
             <button
               onClick={handleRetry}
-              className="bg-[#26bfef] hover:bg-[#0a6c8b] text-white px-6 py-3 rounded-lg transition-colors"
+              className="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg transition-colors"
             >
               Try Again
             </button>
@@ -115,7 +115,7 @@ const DonorDashboard = () => {
 
       <main className="flex-1 ml-64 p-6">
         {/* Welcome */}
-        <h1 className="text-2xl font-bold text-[#26bfef] mb-2">
+        <h1 className="text-2xl font-bold text-primary mb-2">
           Welcome back, {data.username} 👋
         </h1>
         <p className="text-gray-400 mb-6">
@@ -152,13 +152,13 @@ const DonorDashboard = () => {
             <p className="text-sm text-gray-400">
               Progress to next badge
             </p>
-            <p className="text-sm text-[#26bfef]">
+            <p className="text-sm text-primary">
               LKR {data.totalDonated.toLocaleString()} / LKR {data.progressTarget.toLocaleString()}
             </p>
           </div>
           <div className="w-full bg-gray-700 rounded-full h-4">
             <div
-              className="bg-[#26bfef] h-4 rounded-full transition-all duration-500"
+              className="bg-primary h-4 rounded-full transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -169,11 +169,11 @@ const DonorDashboard = () => {
 
         {/* Quick Actions */}
         <div className="bg-[#1F2937] p-6 rounded-xl">
-          <h2 className="text-lg font-semibold text-[#26bfef] mb-4">Quick Actions</h2>
+          <h2 className="text-lg font-semibold text-primary mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <button
               onClick={() => navigate("/donor/browse-causes")}
-              className="bg-[#26bfef] hover:bg-[#0a6c8b] text-white px-6 py-3 rounded-lg transition-colors"
+              className="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg transition-colors"
             >
               Browse Causes
             </button>

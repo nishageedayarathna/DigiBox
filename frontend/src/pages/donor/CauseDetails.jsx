@@ -163,7 +163,7 @@ const CauseDetails = () => {
         <Sidebar role="donor" />
         <main className="flex-1 ml-64 p-6">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-[#26bfef]">Cause Details</h1>
+            <h1 className="text-3xl font-bold text-primary">Cause Details</h1>
             <button
               onClick={() => navigate("/donor/browse-causes")}
               className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
@@ -189,7 +189,7 @@ const CauseDetails = () => {
             <div className="flex gap-3 justify-center">
               <button
                 onClick={handleRetry}
-                className="bg-[#26bfef] hover:bg-[#0a6c8b] text-white px-6 py-3 rounded-lg transition-colors"
+                className="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg transition-colors"
               >
                 Try Again
               </button>
@@ -217,7 +217,7 @@ const CauseDetails = () => {
             <p className="text-gray-400 mb-6">The cause you're looking for doesn't exist or has been removed.</p>
             <button
               onClick={() => navigate("/donor/browse-causes")}
-              className="bg-[#26bfef] hover:bg-[#0a6c8b] text-white px-6 py-3 rounded-lg transition-colors"
+              className="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg transition-colors"
             >
               Browse Other Causes
             </button>
@@ -233,7 +233,7 @@ const CauseDetails = () => {
 
       <main className="flex-1 ml-64 p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-[#26bfef]">Cause Details</h1>
+          <h1 className="text-3xl font-bold text-primary">Cause Details</h1>
           <button
             onClick={() => navigate("/donor/browse-causes")}
             className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
@@ -261,8 +261,8 @@ const CauseDetails = () => {
             <div className="bg-[#1F2937] p-6 rounded-xl">
               <div className="flex justify-between items-start mb-4">
                 <div>
-                  <h2 className="text-2xl font-bold text-[#26bfef] mb-2">{cause.title}</h2>
-                  <span className="px-3 py-1 bg-[#26bfef] text-sm font-semibold rounded-full">
+                  <h2 className="text-2xl font-bold text-primary mb-2">{cause.title}</h2>
+                  <span className="px-3 py-1 bg-primary text-sm font-semibold rounded-full">
                     {cause.category}
                   </span>
                 </div>
@@ -282,7 +282,7 @@ const CauseDetails = () => {
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-4 mb-2">
                   <div
-                    className="bg-[#26bfef] h-4 rounded-full transition-all duration-500"
+                    className="bg-primary h-4 rounded-full transition-all duration-500"
                     style={{ width: `${progressPercentage}%` }}
                   />
                 </div>
@@ -294,7 +294,7 @@ const CauseDetails = () => {
               {/* Beneficiary Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-[#26bfef] mb-3">Beneficiary Details</h3>
+                  <h3 className="text-lg font-semibold text-primary mb-3">Beneficiary Details</h3>
                   <div className="space-y-2 text-sm">
                     <p><strong>Name:</strong> {cause.beneficiaryName}</p>
                     <p><strong>Contact:</strong> {cause.beneficiaryContact}</p>
@@ -303,7 +303,7 @@ const CauseDetails = () => {
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-[#26bfef] mb-3">Location</h3>
+                  <h3 className="text-lg font-semibold text-primary mb-3">Location</h3>
                   <div className="space-y-2 text-sm">
                     <p><strong>Area:</strong> {cause.areaName}</p>
                     <p><strong>Division:</strong> {cause.divisionName}</p>
@@ -315,7 +315,7 @@ const CauseDetails = () => {
               {/* Evidence */}
               {cause.evidenceFile && (
                 <div className="mt-6">
-                  <h3 className="text-lg font-semibold text-[#26bfef] mb-3">Supporting Evidence</h3>
+                  <h3 className="text-lg font-semibold text-primary mb-3">Supporting Evidence</h3>
                   <a
                     href={`http://localhost:5000${cause.evidenceFile}`}
                     target="_blank"
@@ -334,7 +334,7 @@ const CauseDetails = () => {
             {/* Donation Form */}
             {!cause.isCompleted && (
               <div className="bg-[#1F2937] p-6 rounded-xl">
-                <h3 className="text-xl font-bold text-[#26bfef] mb-4">Make a Donation</h3>
+                <h3 className="text-xl font-bold text-primary mb-4">Make a Donation</h3>
 
                 <div className="space-y-4">
                   <div>
@@ -347,7 +347,7 @@ const CauseDetails = () => {
                       onChange={(e) => setDonationAmount(e.target.value)}
                       placeholder="Enter amount"
                       min="100"
-                      className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#26bfef]"
+                      className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary"
                     />
                     <p className="text-xs text-gray-500 mt-1">Minimum donation: LKR 100</p>
                   </div>
@@ -359,7 +359,7 @@ const CauseDetails = () => {
                     <select
                       value={paymentMethod}
                       onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#26bfef]"
+                      className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary"
                     >
                       <option value="Card">Credit/Debit Card</option>
                       <option value="Bank Transfer">Bank Transfer</option>
@@ -369,7 +369,7 @@ const CauseDetails = () => {
                   <button
                     onClick={handleDonate}
                     disabled={donating}
-                    className="w-full bg-[#26bfef] hover:bg-[#0a6c8b] disabled:bg-gray-600 text-white py-3 px-4 rounded-lg transition-colors font-semibold"
+                    className="w-full bg-primary hover:bg-secondary disabled:bg-gray-600 text-white py-3 px-4 rounded-lg transition-colors font-semibold"
                   >
                     {donating ? "Processing..." : "Donate Now"}
                   </button>
@@ -392,7 +392,7 @@ const CauseDetails = () => {
 
             {/* Impact Stats */}
             <div className="bg-[#1F2937] p-6 rounded-xl">
-              <h3 className="text-lg font-semibold text-[#26bfef] mb-4">Impact</h3>
+              <h3 className="text-lg font-semibold text-primary mb-4">Impact</h3>
               <div className="space-y-3">
                 <div className="flex justify-between">
                   <span className="text-gray-400">Funds Raised:</span>
@@ -417,7 +417,7 @@ const CauseDetails = () => {
             <div className="bg-[#1F2937] p-8 rounded-xl max-w-md w-full mx-4">
               <div className="text-center mb-6">
                 <div className="text-6xl mb-4">🎉</div>
-                <h2 className="text-2xl font-bold text-[#26bfef] mb-2">Thank You!</h2>
+                <h2 className="text-2xl font-bold text-primary mb-2">Thank You!</h2>
                 <p className="text-gray-300">Your donation has been processed successfully.</p>
                 <p className="text-sm text-gray-400 mt-2">📧 A confirmation email has been sent to your inbox.</p>
               </div>
@@ -434,7 +434,7 @@ const CauseDetails = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Amount:</span>
-                    <span className="font-semibold text-[#26bfef]">LKR {receipt.amount}</span>
+                    <span className="font-semibold text-primary">LKR {receipt.amount}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Date:</span>
@@ -452,7 +452,7 @@ const CauseDetails = () => {
                 </button>
                 <button
                   onClick={() => navigate("/donor/donation-history")}
-                  className="flex-1 bg-[#26bfef] hover:bg-[#0a6c8b] text-white py-2 px-4 rounded-lg transition-colors"
+                  className="flex-1 bg-primary hover:bg-secondary text-white py-2 px-4 rounded-lg transition-colors"
                 >
                   View History
                 </button>

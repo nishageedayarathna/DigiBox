@@ -171,7 +171,7 @@ const Donate = () => {
         <Sidebar role="donor" />
         <main className="flex-1 ml-64 p-6">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-[#26bfef]">Make a Donation</h1>
+            <h1 className="text-3xl font-bold text-primary">Make a Donation</h1>
             <button
               onClick={() => navigate("/donor/browse-causes")}
               className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
@@ -197,7 +197,7 @@ const Donate = () => {
             <div className="flex gap-3 justify-center">
               <button
                 onClick={handleRetry}
-                className="bg-[#26bfef] hover:bg-[#0a6c8b] text-white px-6 py-3 rounded-lg transition-colors"
+                className="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg transition-colors"
               >
                 Try Again
               </button>
@@ -225,7 +225,7 @@ const Donate = () => {
             <p className="text-gray-400 mb-6">The cause you're looking for doesn't exist or has been removed.</p>
             <button
               onClick={() => navigate("/donor/browse-causes")}
-              className="bg-[#26bfef] hover:bg-[#0a6c8b] text-white px-6 py-3 rounded-lg transition-colors"
+              className="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg transition-colors"
             >
               Browse Other Causes
             </button>
@@ -241,7 +241,7 @@ const Donate = () => {
 
       <main className="flex-1 ml-64 p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-[#26bfef]">Make a Donation</h1>
+          <h1 className="text-3xl font-bold text-primary">Make a Donation</h1>
           <button
             onClick={() => navigate("/donor/browse-causes")}
             className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
@@ -265,9 +265,9 @@ const Donate = () => {
                   }}
                 />
                 <div className="flex-1">
-                  <h2 className="text-xl font-bold text-[#26bfef] mb-2">{cause.title}</h2>
+                  <h2 className="text-xl font-bold text-primary mb-2">{cause.title}</h2>
                   <p className="text-gray-300 text-sm mb-3 line-clamp-3">{cause.description}</p>
-                  <span className="px-3 py-1 bg-[#26bfef] text-sm font-semibold rounded-full">
+                  <span className="px-3 py-1 bg-primary text-sm font-semibold rounded-full">
                     {cause.category}
                   </span>
                 </div>
@@ -276,7 +276,7 @@ const Donate = () => {
 
             {/* Progress Card */}
             <div className="bg-[#1F2937] p-6 rounded-xl">
-              <h3 className="text-lg font-semibold text-[#26bfef] mb-4">Funding Progress</h3>
+              <h3 className="text-lg font-semibold text-primary mb-4">Funding Progress</h3>
 
               <div className="space-y-4">
                 <div className="flex justify-between text-sm">
@@ -294,7 +294,7 @@ const Donate = () => {
 
                 <div className="w-full bg-gray-700 rounded-full h-4">
                   <div
-                    className="bg-[#26bfef] h-4 rounded-full transition-all duration-500"
+                    className="bg-primary h-4 rounded-full transition-all duration-500"
                     style={{ width: `${progressPercentage}%` }}
                   />
                 </div>
@@ -306,7 +306,7 @@ const Donate = () => {
 
             {/* Beneficiary Info */}
             <div className="bg-[#1F2937] p-6 rounded-xl">
-              <h3 className="text-lg font-semibold text-[#26bfef] mb-4">Beneficiary Details</h3>
+              <h3 className="text-lg font-semibold text-primary mb-4">Beneficiary Details</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-400">Name:</span>
@@ -327,7 +327,7 @@ const Donate = () => {
           {/* Donation Form */}
           <div className="space-y-6">
             <div className="bg-[#1F2937] p-6 rounded-xl">
-              <h3 className="text-xl font-bold text-[#26bfef] mb-6">Complete Your Donation</h3>
+              <h3 className="text-xl font-bold text-primary mb-6">Complete Your Donation</h3>
 
               {cause.isCompleted ? (
                 <div className="text-center py-8">
@@ -351,7 +351,7 @@ const Donate = () => {
                       placeholder="Enter amount"
                       min="100"
                       max={remainingAmount}
-                      className="w-full p-4 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#26bfef] text-lg"
+                      className="w-full p-4 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary text-lg"
                       required
                     />
                     <p className="text-xs text-gray-500 mt-2">
@@ -365,13 +365,13 @@ const Donate = () => {
                       Payment Method
                     </label>
                     <div className="space-y-3">
-                      <label className="flex items-center space-x-3 p-4 bg-[#111827] border border-gray-600 rounded-lg cursor-pointer hover:border-[#26bfef] transition-colors">
+                      <label className="flex items-center space-x-3 p-4 bg-[#111827] border border-gray-600 rounded-lg cursor-pointer hover:border-primary transition-colors">
                         <input
                           type="radio"
                           value="Card"
                           checked={paymentMethod === "Card"}
                           onChange={(e) => setPaymentMethod(e.target.value)}
-                          className="text-[#26bfef] focus:ring-[#26bfef]"
+                          className="text-primary focus:ring-primary"
                         />
                         <div>
                           <div className="font-medium">Credit/Debit Card</div>
@@ -379,13 +379,13 @@ const Donate = () => {
                         </div>
                       </label>
 
-                      <label className="flex items-center space-x-3 p-4 bg-[#111827] border border-gray-600 rounded-lg cursor-pointer hover:border-[#26bfef] transition-colors">
+                      <label className="flex items-center space-x-3 p-4 bg-[#111827] border border-gray-600 rounded-lg cursor-pointer hover:border-primary transition-colors">
                         <input
                           type="radio"
                           value="Bank Transfer"
                           checked={paymentMethod === "Bank Transfer"}
                           onChange={(e) => setPaymentMethod(e.target.value)}
-                          className="text-[#26bfef] focus:ring-[#26bfef]"
+                          className="text-primary focus:ring-primary"
                         />
                         <div>
                           <div className="font-medium">Bank Transfer</div>
@@ -399,7 +399,7 @@ const Donate = () => {
                   <button
                     type="submit"
                     disabled={donating}
-                    className="w-full bg-[#26bfef] hover:bg-[#0a6c8b] disabled:bg-gray-600 text-white py-4 px-6 rounded-lg transition-colors font-semibold text-lg disabled:cursor-not-allowed"
+                    className="w-full bg-primary hover:bg-secondary disabled:bg-gray-600 text-white py-4 px-6 rounded-lg transition-colors font-semibold text-lg disabled:cursor-not-allowed"
                   >
                     {donating ? (
                       <div className="flex items-center justify-center space-x-2">
@@ -435,7 +435,7 @@ const Donate = () => {
             <div className="bg-[#1F2937] p-8 rounded-xl max-w-md w-full">
               <div className="text-center mb-6">
                 <div className="text-6xl mb-4">🎉</div>
-                <h2 className="text-2xl font-bold text-[#26bfef] mb-2">Thank You!</h2>
+                <h2 className="text-2xl font-bold text-primary mb-2">Thank You!</h2>
                 <p className="text-gray-300">Your donation has been processed successfully.</p>
                 <p className="text-sm text-gray-400 mt-2">📧 A confirmation email has been sent to your inbox.</p>
               </div>
@@ -444,7 +444,7 @@ const Donate = () => {
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-400">Transaction ID:</span>
-                    <span className="font-mono text-[#26bfef]">{receipt.transactionId}</span>
+                    <span className="font-mono text-primary">{receipt.transactionId}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Cause:</span>
@@ -474,7 +474,7 @@ const Donate = () => {
                 </button>
                 <button
                   onClick={() => navigate("/donor/donation-history")}
-                  className="flex-1 bg-[#26bfef] hover:bg-[#0a6c8b] text-white py-3 px-4 rounded-lg transition-colors"
+                  className="flex-1 bg-primary hover:bg-secondary text-white py-3 px-4 rounded-lg transition-colors"
                 >
                   View History
                 </button>

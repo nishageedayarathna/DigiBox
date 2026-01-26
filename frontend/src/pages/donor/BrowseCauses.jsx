@@ -106,7 +106,7 @@ const BrowseCauses = () => {
 
       <main className="flex-1 ml-64 p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-[#26bfef]">Browse Causes</h1>
+          <h1 className="text-3xl font-bold text-primary">Browse Causes</h1>
           <button
             onClick={() => navigate("/donor/dashboard")}
             className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
@@ -127,7 +127,7 @@ const BrowseCauses = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by title..."
-                className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#26bfef]"
+                className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary"
               />
             </div>
             <div>
@@ -137,7 +137,7 @@ const BrowseCauses = () => {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#26bfef]"
+                className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary"
               >
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>{cat}</option>
@@ -161,7 +161,7 @@ const BrowseCauses = () => {
             <p className="text-gray-400 mb-6">{error}</p>
             <button
               onClick={handleRetry}
-              className="bg-[#26bfef] hover:bg-[#0a6c8b] text-white px-6 py-3 rounded-lg transition-colors"
+              className="bg-primary hover:bg-secondary text-white px-6 py-3 rounded-lg transition-colors"
             >
               Try Again
             </button>
@@ -192,7 +192,7 @@ const BrowseCauses = () => {
             {filteredCauses.map((cause) => (
               <div
                 key={cause._id}
-                className="bg-[#1F2937] rounded-xl overflow-hidden shadow-lg hover:shadow-[#26bfef]/20 transition-all duration-300 cursor-pointer transform hover:scale-105"
+                className="bg-[#1F2937] rounded-xl overflow-hidden shadow-lg hover:shadow-primary/20 transition-all duration-300 cursor-pointer transform hover:scale-105"
                 onClick={() => viewCauseDetails(cause._id)}
               >
                 {/* Cause Image */}
@@ -206,7 +206,7 @@ const BrowseCauses = () => {
                     }}
                   />
                   <div className="absolute top-3 right-3">
-                    <span className="px-2 py-1 bg-[#26bfef] text-xs font-semibold rounded-full">
+                    <span className="px-2 py-1 bg-primary text-xs font-semibold rounded-full">
                       {cause.category}
                     </span>
                   </div>
@@ -222,7 +222,7 @@ const BrowseCauses = () => {
 
                 {/* Cause Content */}
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-[#26bfef] mb-2 line-clamp-2">
+                  <h3 className="text-xl font-bold text-primary mb-2 line-clamp-2">
                     {cause.title}
                   </h3>
 
@@ -234,13 +234,13 @@ const BrowseCauses = () => {
                   <div className="mb-4">
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-gray-400">Raised</span>
-                      <span className="text-[#26bfef]">
+                      <span className="text-primary">
                         LKR {cause.fundsRaised?.toLocaleString() || 0} / LKR {cause.requiredAmount?.toLocaleString() || 0}
                       </span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2">
                       <div
-                        className="bg-[#26bfef] h-2 rounded-full transition-all duration-500"
+                        className="bg-primary h-2 rounded-full transition-all duration-500"
                         style={{
                           width: `${Math.min((cause.fundsRaised / cause.requiredAmount) * 100, 100)}%`
                         }}
@@ -264,7 +264,7 @@ const BrowseCauses = () => {
                       e.stopPropagation();
                       viewCauseDetails(cause._id);
                     }}
-                    className="w-full bg-[#26bfef] hover:bg-[#0a6c8b] text-white py-2 px-4 rounded-lg transition-colors font-medium"
+                    className="w-full bg-primary hover:bg-secondary text-white py-2 px-4 rounded-lg transition-colors font-medium"
                   >
                     View Details & Donate
                   </button>

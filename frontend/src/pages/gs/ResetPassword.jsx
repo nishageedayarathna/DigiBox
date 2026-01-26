@@ -26,7 +26,7 @@ const ResetPassword = () => {
       <Sidebar role="gs" />
 
       <main className="flex-1 p-8 md:ml-64">
-        <h1 className="text-xl font-semibold text-[#26bfef] mb-6">
+        <h1 className="text-xl font-semibold text-primary mb-6">
           Reset Password
         </h1>
 
@@ -42,7 +42,7 @@ const ResetPassword = () => {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full bg-[#26bfef] py-2 rounded font-semibold hover:bg-[#0a6c8b]"
+            className="w-full bg-primary py-2 rounded font-semibold hover:bg-secondary"
           >
             {loading ? "Updating..." : "Update Password"}
           </button>

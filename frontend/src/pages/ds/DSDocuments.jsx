@@ -19,7 +19,7 @@ const DSDocuments = () => {
     <div className="bg-[#111827] min-h-screen text-white flex">
       <Sidebar role="ds" />
       <main className="flex-1 p-8 md:ml-64">
-        <h1 className="text-xl font-semibold text-[#26bfef] mb-6">DS Verification Documents</h1>
+        <h1 className="text-xl font-semibold text-primary mb-6">DS Verification Documents</h1>
         <div className="bg-[#1F2937] p-6 rounded-xl space-y-4">
           {docs.length === 0 && <p className="text-gray-400 text-sm">No documents available yet.</p>}
           {docs.map((doc) => (
@@ -30,7 +30,7 @@ const DSDocuments = () => {
                   DS Officer: {doc.dsOfficer?.username || "N/A"} | Approved on: {doc.updatedAt ? new Date(doc.updatedAt).toLocaleDateString() : "N/A"}
                 </p>
               </div>
-              <a href={`http://localhost:5000${doc.dsDocument}`} target="_blank" rel="noreferrer" className="text-[#26bfef] text-sm underline">View PDF</a>
+              <a href={`http://localhost:5000${doc.dsDocument}`} target="_blank" rel="noreferrer" className="text-primary text-sm underline">View PDF</a>
             </div>
           ))}
         </div>

@@ -5,7 +5,7 @@ const SubmitButton = ({ label }) => {
   return (
     <button
       type="submit"
-      className="w-full py-3 bg-[#26bfef] hover:bg-[#0a6c8b] rounded-lg font-semibold transition"
+      className="w-full py-3 bg-primary hover:bg-primary-dark rounded-lg font-semibold transition"
     >
       {label}
     </button>

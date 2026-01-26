@@ -153,7 +153,7 @@ DigiBox Donation Platform
 
       <main className="flex-1 ml-64 p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-[#26bfef]">Donation History</h1>
+          <h1 className="text-3xl font-bold text-primary">Donation History</h1>
           <div className="flex gap-3">
             {filteredDonations.length > 0 && (
               <button
@@ -175,15 +175,15 @@ DigiBox Donation Platform
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-[#1F2937] p-4 rounded-xl">
-            <h3 className="text-lg font-semibold text-[#26bfef]">Total Donated</h3>
+            <h3 className="text-lg font-semibold text-primary">Total Donated</h3>
             <p className="text-2xl font-bold">LKR {totalDonated.toLocaleString()}</p>
           </div>
           <div className="bg-[#1F2937] p-4 rounded-xl">
-            <h3 className="text-lg font-semibold text-[#26bfef]">Total Donations</h3>
+            <h3 className="text-lg font-semibold text-primary">Total Donations</h3>
             <p className="text-2xl font-bold">{totalDonations}</p>
           </div>
           <div className="bg-[#1F2937] p-4 rounded-xl">
-            <h3 className="text-lg font-semibold text-[#26bfef]">Average Donation</h3>
+            <h3 className="text-lg font-semibold text-primary">Average Donation</h3>
             <p className="text-2xl font-bold">
               LKR {totalDonations > 0 ? (totalDonated / totalDonations).toFixed(0) : 0}
             </p>
@@ -198,7 +198,7 @@ DigiBox Donation Platform
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="p-2 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-[#26bfef]"
+            className="p-2 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary"
           >
             <option value="all">All Time</option>
             <option value="thisMonth">This Month</option>
@@ -214,7 +214,7 @@ DigiBox Donation Platform
             <p className="text-gray-400 text-lg">No donations found for the selected period.</p>
             <button
               onClick={() => navigate("/donor/browse-causes")}
-              className="mt-4 bg-[#26bfef] hover:bg-[#0a6c8b] text-white px-6 py-2 rounded-lg transition-colors"
+              className="mt-4 bg-primary hover:bg-secondary text-white px-6 py-2 rounded-lg transition-colors"
             >
               Browse Causes
             </button>
@@ -228,7 +228,7 @@ DigiBox Donation Platform
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-[#26bfef] mb-1">
+                    <h3 className="text-lg font-semibold text-primary mb-1">
                       {donation.cause.title}
                     </h3>
                     <p className="text-gray-300 text-sm mb-2">
@@ -246,7 +246,7 @@ DigiBox Donation Platform
                     </p>
                     <button
                       onClick={() => downloadReceipt(donation)}
-                      className="mt-2 text-[#26bfef] hover:text-[#0a6c8b] text-sm underline"
+                      className="mt-2 text-primary hover:text-secondary text-sm underline"
                     >
                       Download Receipt
                     </button>
@@ -265,7 +265,7 @@ DigiBox Donation Platform
         {/* Impact Summary */}
         {filteredDonations.length > 0 && (
           <div className="mt-8 bg-[#1F2937] p-6 rounded-xl">
-            <h3 className="text-xl font-semibold text-[#26bfef] mb-4">Your Impact</h3>
+            <h3 className="text-xl font-semibold text-primary mb-4">Your Impact</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h4 className="text-lg font-medium mb-3">Donation Breakdown</h4>

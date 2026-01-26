@@ -195,7 +195,7 @@ const CreateCause = () => {
       <Sidebar role="creator" />
 
       <main className="flex-1 ml-0 md:ml-64 p-8">
-        <h1 className="text-3xl font-bold text-[#26bfef] mb-8 text-center">
+        <h1 className="text-3xl font-bold text-primary mb-8 text-center">
           Create New Cause
         </h1>
 
@@ -289,7 +289,7 @@ const CreateCause = () => {
             </div>
 
             {/* CASCADING DROPDOWNS */}
-            <h2 className="text-xl font-bold text-[#26bfef] pt-4">Select Area</h2>
+            <h2 className="text-xl font-bold text-primary pt-4">Select Area</h2>
 
             {loadingHierarchy ? (
               <p>Loading districts...</p>
@@ -357,7 +357,7 @@ const CreateCause = () => {
             )}
 
             {/* BANK */}
-            <h2 className="text-xl font-bold text-[#26bfef] pt-4">
+            <h2 className="text-xl font-bold text-primary pt-4">
               Banking Details
             </h2>
 
@@ -383,7 +383,7 @@ const CreateCause = () => {
               {renderError(errors.evidence)}
             </div>
 
-            <button className="w-full py-3 bg-[#26bfef] rounded-lg font-semibold hover:bg-[#0a6c8b]">
+            <button className="w-full py-3 bg-primary rounded-lg font-semibold hover:bg-secondary">
               Submit Cause
             </button>
           </form>

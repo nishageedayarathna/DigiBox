@@ -118,7 +118,7 @@ const PendingCauses = () => {
       <Sidebar role="gs" />
 
       <main className="flex-1 p-8 md:ml-64">
-        <h1 className="text-xl font-semibold text-[#26bfef] mb-6">
+        <h1 className="text-xl font-semibold text-primary mb-6">
           Pending Causes for Verification
         </h1>
 
@@ -144,7 +144,7 @@ const PendingCauses = () => {
                       href={`http://localhost:5000${c.evidenceFile}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[#26bfef] underline"
+                      className="text-primary underline"
                     >
                       View
                     </a>
@@ -261,7 +261,7 @@ const Modal = ({ title, children, onClose }) => (
   <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
     <div className="bg-[#1F2937] p-6 rounded-xl w-[400px]">
       <div className="flex justify-between mb-4">
-        <h2 className="text-lg font-semibold text-[#26bfef]">{title}</h2>
+        <h2 className="text-lg font-semibold text-primary">{title}</h2>
         <button onClick={onClose} className="text-gray-400">
           ✕
         </button>

@@ -9,7 +9,7 @@ const RecentList = ({
 }) => {
   return (
     <div className="bg-[#1F2937] p-6 rounded-2xl shadow-md">
-      <h2 className="text-xl font-semibold mb-4 text-[#26bfef]">{title}</h2>
+      <h2 className="text-xl font-semibold mb-4 text-primary">{title}</h2>
 
       {data.length > 0 ? (
         <ul className="space-y-3">

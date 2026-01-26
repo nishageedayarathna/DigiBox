@@ -52,15 +52,15 @@ const QuickActions = ({ role = "creator", onViewChange }) => {
 
   return (
     <div className="bg-[#1F2937] p-6 rounded-2xl shadow-md mt-8">
-      <h2 className="text-xl font-semibold mb-5 text-[#26bfef]">Quick Actions</h2>
+      <h2 className="text-xl font-semibold mb-5 text-primary">Quick Actions</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-5">
         {actions[role].map((action, index) => (
           <div
             key={index}
             onClick={action.onClick}
-            className="flex flex-col items-center justify-center bg-[#111827] p-5 rounded-xl hover:bg-[#0a6c8b]/30 transition cursor-pointer shadow-md hover:shadow-lg"
+            className="flex flex-col items-center justify-center bg-[#111827] p-5 rounded-xl hover:bg-secondary/30 transition cursor-pointer shadow-md hover:shadow-lg"
           >
-            <div className="text-[#26bfef] mb-3">{action.icon}</div>
+            <div className="text-primary mb-3">{action.icon}</div>
             <p className="text-sm font-medium text-center">{action.title}</p>
           </div>
         ))}

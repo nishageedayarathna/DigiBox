@@ -20,7 +20,7 @@ const DSResetPassword = () => {
       <Sidebar role="ds" />
 
       <div className="flex-1 p-8 ml-64">
-        <h1 className="text-xl text-[#26bfef] mb-4">Reset Password</h1>
+        <h1 className="text-xl text-primary mb-4">Reset Password</h1>
 
         <input
           type="password"
@@ -29,7 +29,7 @@ const DSResetPassword = () => {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button onClick={reset} className="bg-[#26bfef] px-4 py-2 rounded">
+        <button onClick={reset} className="bg-primary px-4 py-2 rounded">
           Update
         </button>
       </div>

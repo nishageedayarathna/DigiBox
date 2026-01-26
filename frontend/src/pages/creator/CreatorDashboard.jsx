@@ -1,7 +1,6 @@
 // CreatorDashboard.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { motion, AnimatePresence } from "framer-motion";
 
 import Sidebar from "../../components/dashboard/Sidebar";
 import StatsCard from "../../components/dashboard/StatCard";
@@ -40,48 +39,46 @@ const CreatorDashboard = () => {
     <div className="bg-[#111827] min-h-screen text-white flex">
       <Sidebar role="creator" />
       <main className="flex-1 p-8 md:ml-64 overflow-x-hidden">
-        <AnimatePresence mode="wait">
-          {activeView === "dashboard" && (
-            <motion.div key="dashboard" initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 30 }} transition={{ duration: 0.5 }}>
-              <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-[#26bfef]">Creator Dashboard</h1>
-                <UserProfileMenu />
-              </div>
+        {activeView === "dashboard" && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-3xl font-bold text-primary">Creator Dashboard</h1>
+              <UserProfileMenu />
+            </div>
 
-              {/* Stats Section */}
-              {stats && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
-                  <StatsCard title="Total Causes Created" value={stats.totalCauses || 0} />
-                  <StatsCard title="Approved Causes" value={stats.approved || 0} />
-                  <StatsCard title="Pending Causes" value={stats.pending || 0} />
-                  <StatsCard title="Rejected Causes" value={stats.rejected || 0} />
-                  <StatsCard title="Total Funds Raised" value={`LKR ${stats.totalFunds || 0}`} />
-                </div>
-              )}
-
-              <div className="bg-[#1F2937] p-6 rounded-2xl shadow-lg mb-10">
-                <h2 className="text-xl font-semibold mb-4 text-[#26bfef]">Monthly Causes Created</h2>
-                <AnalyticsChart data={chartData} showLabels />
+            {/* Stats Section */}
+            {stats && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
+                <StatsCard title="Total Causes Created" value={stats.totalCauses || 0} />
+                <StatsCard title="Approved Causes" value={stats.approved || 0} />
+                <StatsCard title="Pending Causes" value={stats.pending || 0} />
+                <StatsCard title="Rejected Causes" value={stats.rejected || 0} />
+                <StatsCard title="Total Funds Raised" value={`LKR ${stats.totalFunds || 0}`} />
               </div>
+            )}
 
-              <RecentList title="Recent Causes Created" data={recentCauses} titleKey="title" statusKey="status" dateKey="createdAt" />
-              <QuickActions role="creator" onViewChange={setActiveView} />
-            </motion.div>
-          )}
+            <div className="bg-[#1F2937] p-6 rounded-2xl shadow-lg mb-10">
+              <h2 className="text-xl font-semibold mb-4 text-primary">Monthly Causes Created</h2>
+              <AnalyticsChart data={chartData} showLabels />
+            </div>
 
-          {activeView === "analytics" && (
-            <motion.div key="analytics" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.5 }}>
-              <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold text-[#26bfef]">Analytics Overview</h1>
-                <button onClick={() => setActiveView("dashboard")} className="px-4 py-2 bg-[#26bfef] text-white rounded-lg hover:bg-[#0a6c8b] transition">← Back to Dashboard</button>
-              </div>
-              <div className="bg-[#1F2937] p-8 rounded-2xl shadow-lg">
-                <h2 className="text-xl font-semibold mb-5 text-[#26bfef]">Monthly Cause Statistics</h2>
-                <AnalyticsChart data={chartData} showLabels />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            <RecentList title="Recent Causes Created" data={recentCauses} titleKey="title" statusKey="status" dateKey="createdAt" />
+            <QuickActions role="creator" onViewChange={setActiveView} />
+          </div>
+        )}
+
+        {activeView === "analytics" && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-3xl font-bold text-primary">Analytics Overview</h1>
+              <button onClick={() => setActiveView("dashboard")} className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition">← Back to Dashboard</button>
+            </div>
+            <div className="bg-[#1F2937] p-8 rounded-2xl shadow-lg">
+              <h2 className="text-xl font-semibold mb-5 text-primary">Monthly Cause Statistics</h2>
+              <AnalyticsChart data={chartData} showLabels />
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

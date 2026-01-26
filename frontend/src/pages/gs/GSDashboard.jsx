@@ -105,7 +105,7 @@ const GSDashboard = () => {
           <img
             src={user.profileImage}
             alt="GS Officer Profile"
-            className="w-16 h-16 rounded-full border-2 border-[#26bfef]"
+            className="w-16 h-16 rounded-full border-2 border-primary"
           />
           <div>
             <h2 className="text-xl font-bold text-white">{user.username}</h2>
@@ -122,7 +122,7 @@ const GSDashboard = () => {
 
         {/* Monthly Analytics Chart */}
         <div className="bg-[#1F2937] p-6 rounded-xl shadow mb-8">
-          <h2 className="text-lg font-semibold text-[#26bfef] mb-4">Monthly Verification Stats</h2>
+          <h2 className="text-lg font-semibold text-primary mb-4">Monthly Verification Stats</h2>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={monthlyAnalytics}>
               <XAxis dataKey="month" />
@@ -139,7 +139,7 @@ const GSDashboard = () => {
         {/* RECEIVED CAUSES */}
         <div className="bg-[#1F2937] p-6 rounded-xl shadow">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl text-[#26bfef]">Received Causes</h2>
+            <h2 className="text-xl text-primary">Received Causes</h2>
             <div className="flex gap-2">
               {["all", "pending", "approved", "rejected"].map((status) => (
                 <button
@@ -147,7 +147,7 @@ const GSDashboard = () => {
                   onClick={() => handleFilterChange(status)}
                   className={`px-4 py-2 rounded text-sm ${
                     filterStatus === status
-                      ? "bg-[#26bfef] text-white"
+                      ? "bg-primary text-white"
                       : "bg-gray-600 hover:bg-gray-700 text-white"
                   }`}
                 >
@@ -166,7 +166,7 @@ const GSDashboard = () => {
               {allCauses.map((cause) => (
                 <div key={cause._id} className="bg-[#374151] p-4 rounded-lg">
                   <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-[#26bfef]">{cause.title}</h3>
+                    <h3 className="font-semibold text-primary">{cause.title}</h3>
                     {getStatusBadge(cause)}
                   </div>
                   <p className="text-sm text-gray-300 mb-2">{cause.description.substring(0, 100)}...</p>

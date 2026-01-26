@@ -33,7 +33,7 @@ const AdminStructure = () => {
       <Sidebar role="admin" />
 
       <main className="ml-64 p-8 w-full">
-        <h1 className="text-3xl font-bold text-[#26bfef] mb-6">
+        <h1 className="text-3xl font-bold text-primary mb-6">
           Administrative Structure
         </h1>
 
@@ -43,7 +43,7 @@ const AdminStructure = () => {
             placeholder="Search by district or division..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="p-3 w-full rounded bg-[#1F2937] border border-gray-600 text-white focus:outline-none focus:border-[#26bfef]"
+            className="p-3 w-full rounded bg-[#1F2937] border border-gray-600 text-white focus:outline-none focus:border-primary"
           />
         </div>
 
@@ -56,7 +56,7 @@ const AdminStructure = () => {
             key={district.districtCode}
             className="bg-[#1F2937] p-6 mb-6 rounded-xl"
           >
-            <h2 className="text-2xl font-semibold text-[#26bfef] mb-4">
+            <h2 className="text-2xl font-semibold text-primary mb-4">
               District: {district.districtName} ({district.districtCode})
             </h2>
 

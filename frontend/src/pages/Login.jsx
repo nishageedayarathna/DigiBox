@@ -65,17 +65,25 @@ const Login = () => {
             name="password"
             value={formData.password}
             onChange={handleChange}
+            showPasswordToggle={true}
           />
 
           <SubmitButton label="Login" />
         </form>
 
-        <p className="text-center text-gray-400 mt-4">
-          Don’t have an account?{" "}
-          <Link to="/signup" className="text-[#26bfef] hover:underline">
-            Sign Up
-          </Link>
-        </p>
+        <div className="text-center text-gray-400 mt-4 space-y-2">
+          <p>
+            <Link to="/forgot-password" className="text-primary hover:underline">
+              Forgot Password?
+            </Link>
+          </p>
+          <p>
+            Don’t have an account?{" "}
+            <Link to="/signup" className="text-primary hover:underline">
+              Sign Up
+            </Link>
+          </p>
+        </div>
 
       </FormCard>
     </div>

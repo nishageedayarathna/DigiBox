@@ -37,7 +37,7 @@ const Causes = () => {
       <Sidebar role="donor" />
 
       <main className="flex-1 ml-64 p-6">
-        <h1 className="text-2xl font-bold text-[#26bfef] mb-6">
+        <h1 className="text-2xl font-bold text-primary mb-6">
           Available Causes
         </h1>
 
@@ -57,7 +57,7 @@ const Causes = () => {
 
               <Link
                 to={`/donor/causes/${cause._id}`}
-                className="inline-block mt-3 text-[#26bfef]"
+                className="inline-block mt-3 text-primary"
               >
                 View Details →
               </Link>

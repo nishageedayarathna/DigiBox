@@ -26,14 +26,14 @@ const FeatureSection = () => {
 
   return (
     <section className="py-16 bg-[#1F2937]" id="features">
-      <h2 className="text-center text-3xl font-bold mb-12 text-[#26bfef]">
+      <h2 className="text-center text-3xl font-bold mb-12 text-primary">
         Why Choose DigiBox?
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 px-8">
         {features.map((feature, index) => (
           <div
             key={index}
-            className="bg-[#111827] rounded-2xl p-6 text-center shadow-lg hover:shadow-[#26bfef]/40 transition"
+            className="bg-[#111827] rounded-2xl p-6 text-center shadow-lg hover:shadow-primary/40 transition"
           >
             <div className="text-5xl mb-4">{feature.icon}</div>
             <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
