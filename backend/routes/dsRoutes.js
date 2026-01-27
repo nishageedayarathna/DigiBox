@@ -25,27 +25,17 @@ router.get("/dashboard", protect, authorize("ds"), async (req, res) => {
       },
     };
 
-    // All causes in officer's division that GS approved
-    const totalCauses = await Cause.countDocuments({
+    // Only consider GS-approved causes in DS officer's area
+    const query = {
       divisionCode: user.divisionCode,
-      gsStatus: "approved",
-    });
+      gsStatus: "approved",   // <-- only GS-approved causes
+    };
 
-    const pendingCauses = await Cause.countDocuments({
-      divisionCode: user.divisionCode,
-      gsStatus: "approved",
-      dsStatus: "pending",
-    });
+    const totalCauses = await Cause.countDocuments(query);
 
-    const approvedCauses = await Cause.countDocuments({
-      divisionCode: user.divisionCode,
-      dsStatus: "approved",
-    });
-
-    const rejectedCauses = await Cause.countDocuments({
-      divisionCode: user.divisionCode,
-      dsStatus: "rejected",
-    });
+    const pendingCauses = await Cause.countDocuments({ ...query, dsStatus: "pending" });
+    const approvedCauses = await Cause.countDocuments({ ...query, dsStatus: "approved" });
+    const rejectedCauses = await Cause.countDocuments({ ...query, dsStatus: "rejected" });
 
     // Monthly analytics based on DS decisions only
     const startOfYear = new Date(new Date().getFullYear(), 0, 1);
@@ -53,7 +43,7 @@ router.get("/dashboard", protect, authorize("ds"), async (req, res) => {
     const rawData = await Cause.aggregate([
       {
         $match: {
-          divisionCode: user.divisionCode,
+          ...query,
           createdAt: { $gte: startOfYear },
           dsStatus: { $in: ["pending", "approved", "rejected"] },
         },
@@ -66,7 +56,6 @@ router.get("/dashboard", protect, authorize("ds"), async (req, res) => {
       },
     ]);
 
-    // Initialize months with 0 counts
     const monthlyAnalytics = Array.from({ length: 12 }, (_, i) => ({
       month: i + 1,
       pending: 0,
@@ -91,6 +80,7 @@ router.get("/dashboard", protect, authorize("ds"), async (req, res) => {
     res.status(500).json({ message: "Failed to load DS dashboard" });
   }
 });
+
 
 
 
@@ -353,15 +343,25 @@ router.get("/documents", protect, authorize("ds"), async (req, res) => {
   }
 });
 
-/* ---------------- GET ALL CAUSES FOR DS ---------------- */
 router.get("/all-causes", protect, authorize("ds"), async (req, res) => {
   try {
     const { status } = req.query;
-    let query = { divisionCode: req.user.divisionCode };
 
+    // Base query: only GS-approved in the DS officer's division
+    let query = {
+      divisionCode: req.user.divisionCode,
+      gsStatus: "approved",
+    };
+
+    // Filter by DS status only if specified
     if (status === "pending") query.dsStatus = "pending";
     if (status === "approved") query.dsStatus = "approved";
     if (status === "rejected") query.dsStatus = "rejected";
+
+    // If status is "all" or undefined, include all DS statuses (pending, approved, rejected)
+    if (!status || status === "all") {
+      query.dsStatus = { $in: ["pending", "approved", "rejected"] };
+    }
 
     const causes = await Cause.find(query)
       .populate("creator", "username email")
@@ -370,8 +370,10 @@ router.get("/all-causes", protect, authorize("ds"), async (req, res) => {
 
     res.json(causes);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Error fetching all causes" });
   }
 });
+
 
 module.exports = router;

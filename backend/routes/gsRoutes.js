@@ -334,15 +334,24 @@ router.get("/documents", protect, authorize("gs"), async (req, res) => {
   }
 });
 
-/* ---------------- GET ALL CAUSES FOR GS ---------------- */
 router.get("/all-causes", protect, authorize("gs"), async (req, res) => {
   try {
     const { status } = req.query;
-    let query = { areaCode: req.user.areaCode };
 
+    // Base query: only admin-approved causes in GS officer's area
+    let query = {
+      areaCode: req.user.areaCode,
+      adminStatus: "approved",
+    };
+
+    // Filter by GS status if specified
     if (status === "pending") query.gsStatus = "pending";
-    if (status === "approved") query.gsStatus = "approved";
-    if (status === "rejected") query.gsStatus = "rejected";
+    else if (status === "approved") query.gsStatus = "approved";
+    else if (status === "rejected") query.gsStatus = "rejected";
+    else {
+      // If status is "all" or undefined, include all GS statuses
+      query.gsStatus = { $in: ["pending", "approved", "rejected"] };
+    }
 
     const causes = await Cause.find(query)
       .populate("creator", "username email")
@@ -350,8 +359,10 @@ router.get("/all-causes", protect, authorize("gs"), async (req, res) => {
 
     res.json(causes);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Error fetching all causes" });
   }
 });
+
 
 module.exports = router;
