@@ -26,6 +26,9 @@ router.post("/create", protect, authorize("creator"), upload.single("evidenceFil
     // Validate contact and account
     if (!/^07\d{8}$/.test(req.body.beneficiaryContact)) return res.status(400).json({ message: "Invalid contact" });
     if (!/^\d{6,20}$/.test(req.body.beneficiaryAccountNumber)) return res.status(400).json({ message: "Invalid account" });
+    if (!req.body.beneficiaryAddress || req.body.beneficiaryAddress.trim().length < 10) {
+      return res.status(400).json({ message: "Beneficiary address is required and must be at least 10 characters" });
+    }
 
     // Map GS and DS automatically
     const gsOfficer = await User.findOne({ role: "gs", areaCode: req.body.areaCode });
@@ -42,6 +45,7 @@ router.post("/create", protect, authorize("creator"), upload.single("evidenceFil
       requiredAmount: Number(req.body.requiredAmount),
       beneficiaryName: req.body.beneficiaryName,
       beneficiaryContact: req.body.beneficiaryContact,
+      beneficiaryAddress: req.body.beneficiaryAddress,
       beneficiaryAccountName: req.body.beneficiaryAccountName,
       beneficiaryBank: req.body.beneficiaryBank,
       beneficiaryAccountNumber: req.body.beneficiaryAccountNumber,

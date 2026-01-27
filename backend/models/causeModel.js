@@ -8,6 +8,7 @@ const causeSchema = new mongoose.Schema(
     requiredAmount: Number,
     beneficiaryName: String,
     beneficiaryContact: String,
+    beneficiaryAddress: String, // NEW: Address field
     beneficiaryAccountName: String,
     beneficiaryBank: String,
     beneficiaryAccountNumber: String,
