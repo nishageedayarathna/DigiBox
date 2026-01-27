@@ -5,9 +5,14 @@ import StatCard from "../../components/dashboard/StatCard";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
-// Skeleton Loader Component
-const SkeletonLoader = ({ className }) => (
-  <div className={`animate-pulse bg-gray-700 rounded ${className}`}></div>
+// Spinner Component
+const Spinner = ({ size = 16, text = "Loading..." }) => (
+  <div className="flex flex-col items-center">
+    <div
+      className={`w-${size} h-${size} border-4 border-blue-500 border-t-transparent rounded-full animate-spin`}
+    ></div>
+    <p className="text-white text-lg mt-3">{text}</p>
+  </div>
 );
 
 const DonorDashboard = () => {
@@ -38,45 +43,14 @@ const DonorDashboard = () => {
     fetchSummary();
   }, [fetchSummary]);
 
-  const handleRetry = () => {
-    fetchSummary();
-  };
+  const handleRetry = () => fetchSummary();
 
   if (loading) {
     return (
       <div className="bg-[#111827] min-h-screen flex text-white">
         <Sidebar role="donor" />
-        <main className="flex-1 ml-64 p-6">
-          {/* Welcome Skeleton */}
-          <SkeletonLoader className="h-8 w-64 mb-2" />
-          <SkeletonLoader className="h-4 w-96 mb-6" />
-
-          {/* Stats Grid Skeleton */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-[#1F2937] p-6 rounded-xl">
-                <SkeletonLoader className="h-4 w-24 mb-2" />
-                <SkeletonLoader className="h-8 w-20" />
-              </div>
-            ))}
-          </div>
-
-          {/* Progress Bar Skeleton */}
-          <div className="bg-[#1F2937] p-6 rounded-xl mb-6">
-            <SkeletonLoader className="h-4 w-48 mb-3" />
-            <SkeletonLoader className="h-4 w-full mb-2" />
-            <SkeletonLoader className="h-3 w-24" />
-          </div>
-
-          {/* Quick Actions Skeleton */}
-          <div className="bg-[#1F2937] p-6 rounded-xl">
-            <SkeletonLoader className="h-6 w-32 mb-4" />
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[...Array(3)].map((_, i) => (
-                <SkeletonLoader key={i} className="h-12 w-full rounded-lg" />
-              ))}
-            </div>
-          </div>
+        <main className="flex-1 ml-64 p-6 flex justify-center items-center">
+          <Spinner size={20} text="Loading dashboard..." />
         </main>
       </div>
     );
@@ -149,9 +123,7 @@ const DonorDashboard = () => {
         {/* Progress Bar */}
         <div className="bg-[#1F2937] p-6 rounded-xl mb-6">
           <div className="flex justify-between items-center mb-3">
-            <p className="text-sm text-gray-400">
-              Progress to next badge
-            </p>
+            <p className="text-sm text-gray-400">Progress to next badge</p>
             <p className="text-sm text-primary">
               LKR {data.totalDonated.toLocaleString()} / LKR {data.progressTarget.toLocaleString()}
             </p>
@@ -162,9 +134,7 @@ const DonorDashboard = () => {
               style={{ width: `${progress}%` }}
             />
           </div>
-          <p className="text-xs text-gray-500 mt-2">
-            {progress.toFixed(1)}% complete
-          </p>
+          <p className="text-xs text-gray-500 mt-2">{progress.toFixed(1)}% complete</p>
         </div>
 
         {/* Quick Actions */}

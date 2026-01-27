@@ -1,4 +1,3 @@
-// CreatorDashboard.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -14,26 +13,47 @@ const CreatorDashboard = () => {
   const [stats, setStats] = useState(null);
   const [recentCauses, setRecentCauses] = useState([]);
   const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(true); // Loading state
 
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    axios.get("http://localhost:5000/api/cause/stats", { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => setStats(res.data))
-      .catch(err => console.error("Stats error:", err));
+    const fetchData = async () => {
+      try {
+        const [statsRes, recentRes, chartRes] = await Promise.all([
+          axios.get("http://localhost:5000/api/cause/stats", { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get("http://localhost:5000/api/cause/my-causes", { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get("http://localhost:5000/api/cause/analytics/monthly", { headers: { Authorization: `Bearer ${token}` } })
+        ]);
 
-    axios.get("http://localhost:5000/api/cause/my-causes", { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => setRecentCauses(res.data.slice(0, 5)))
-      .catch(err => console.error("Recent causes error:", err));
+        setStats(statsRes.data);
+        setRecentCauses(recentRes.data.slice(0, 5));
 
-    axios.get("http://localhost:5000/api/cause/analytics/monthly", { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => {
         const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-        const formatted = res.data.map(d => ({ month: months[d.month - 1], causes: d.count }));
+        const formatted = chartRes.data.map(d => ({ month: months[d.month - 1], causes: d.count }));
         setChartData(formatted);
-      })
-      .catch(err => console.error("Analytics error:", err));
+
+      } catch (err) {
+        console.error("Dashboard fetch error:", err);
+      } finally {
+        setLoading(false); // finished loading
+      }
+    };
+
+    fetchData();
   }, []);
+
+  // Show centered spinner while loading
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-[#111827]">
+        <div className="flex flex-col items-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-white text-xl mt-4">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#111827] min-h-screen text-white flex">

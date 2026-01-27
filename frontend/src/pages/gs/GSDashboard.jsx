@@ -5,6 +5,16 @@ import { fetchGSDashboard } from "../../services/gsService";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { FaHourglassHalf, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
+// Spinner Component
+const Spinner = ({ size = 16, text = "Loading..." }) => (
+  <div className="flex flex-col items-center justify-center w-full h-full">
+    <div
+      className={`w-${size} h-${size} border-4 border-blue-500 border-t-transparent rounded-full animate-spin`}
+    ></div>
+    <p className="text-white text-lg mt-3">{text}</p>
+  </div>
+);
+
 const GSDashboard = () => {
   const [stats, setStats] = useState(null);
   const [area, setArea] = useState(null);
@@ -72,18 +82,21 @@ const GSDashboard = () => {
   };
 
   const getStatusBadge = (cause) => {
-    if (cause.gsStatus === "rejected") {
-      return <span className="px-2 py-1 bg-red-600 text-white text-xs rounded">Rejected</span>;
-    }
-    if (cause.gsStatus === "approved") {
-      return <span className="px-2 py-1 bg-green-600 text-white text-xs rounded">Approved</span>;
-    }
+    if (cause.gsStatus === "rejected") return <span className="px-2 py-1 bg-red-600 text-white text-xs rounded">Rejected</span>;
+    if (cause.gsStatus === "approved") return <span className="px-2 py-1 bg-green-600 text-white text-xs rounded">Approved</span>;
     return <span className="px-2 py-1 bg-yellow-600 text-white text-xs rounded">Pending Review</span>;
   };
 
-  // Safe loading
+  // Centered loading for initial dashboard
   if (loading || !user || !area || !stats) {
-    return <p className="text-white p-8">Loading...</p>;
+    return (
+      <div className="bg-[#111827] min-h-screen flex text-white">
+        <Sidebar role="gs" />
+        <main className="flex-1 ml-64 p-6 flex justify-center items-center">
+          <Spinner size={20} text="Loading dashboard..." />
+        </main>
+      </div>
+    );
   }
 
   return (
@@ -136,7 +149,7 @@ const GSDashboard = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* RECEIVED CAUSES */}
+        {/* Received Causes */}
         <div className="bg-[#1F2937] p-6 rounded-xl shadow">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl text-primary">Received Causes</h2>
@@ -158,7 +171,9 @@ const GSDashboard = () => {
           </div>
 
           {causesLoading ? (
-            <p className="text-center py-4">Loading causes...</p>
+            <div className="flex justify-center items-center py-20">
+              <Spinner size={16} text="Loading causes..." />
+            </div>
           ) : allCauses.length === 0 ? (
             <p className="text-center py-4 text-gray-400">No causes found</p>
           ) : (
@@ -175,8 +190,7 @@ const GSDashboard = () => {
                     <span>{new Date(cause.createdAt).toLocaleDateString()}</span>
                   </div>
                   <div className="mt-2 text-xs text-gray-500">
-                    Amount: LKR {cause.requiredAmount.toLocaleString()} |
-                    Area: {cause.areaName}
+                    Amount: LKR {cause.requiredAmount.toLocaleString()} | Area: {cause.areaName}
                   </div>
                 </div>
               ))}

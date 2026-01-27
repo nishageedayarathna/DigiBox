@@ -13,6 +13,16 @@ import {
 } from "recharts";
 import { FaHourglassHalf, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
+// Spinner Component
+const Spinner = ({ size = 16, text = "Loading..." }) => (
+  <div className="flex flex-col items-center justify-center w-full h-full">
+    <div
+      className={`w-${size} h-${size} border-4 border-blue-500 border-t-transparent rounded-full animate-spin`}
+    ></div>
+    <p className="text-white text-lg mt-3">{text}</p>
+  </div>
+);
+
 const DSDashboard = () => {
   const [stats, setStats] = useState(null);
   const [area, setArea] = useState(null);
@@ -43,7 +53,7 @@ const DSDashboard = () => {
         setUser({
           username: data.welcomeInfo.dsOfficer.username,
           email: data.welcomeInfo.dsOfficer.email,
-          profileImage: data.welcomeInfo.dsOfficer.profileImage || "/images/default-profile.png",
+          profileImage: data.welcomeInfo.dsOfficer.profileImage || "/assets/images/user.webp",
         });
 
         setLoading(false);
@@ -81,11 +91,17 @@ const DSDashboard = () => {
     return <span className="px-2 py-1 bg-yellow-600 text-white text-xs rounded">Pending Review</span>;
   };
 
-  useEffect(() => {
-    fetchAllCauses();
-  }, []);
-
-  if (loading) return <p className="text-white p-8">Loading...</p>;
+  // Centered Loading for initial dashboard
+  if (loading) {
+    return (
+      <div className="bg-[#111827] min-h-screen flex text-white">
+        <Sidebar role="ds" />
+        <main className="flex-1 ml-64 p-6 flex justify-center items-center">
+          <Spinner size={20} text="Loading dashboard..." />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-r from-[#111827] via-[#1F2937] to-[#111827] min-h-screen text-white flex relative">
@@ -104,11 +120,10 @@ const DSDashboard = () => {
         {/* Profile */}
         <div className="flex items-center gap-4 mb-6">
           <img
-            src="/assets/images/user.webp" // default DS officer image
+            src={user.profileImage || "/assets/images/user.webp"}
             alt="DS Officer Profile"
             className="w-16 h-16 rounded-full border-2 border-primary"
-            />
-
+          />
           <div>
             <h2 className="text-xl font-bold text-white">{user.username}</h2>
             <p className="text-gray-400">{area.division}, {area.district}</p>
@@ -117,31 +132,14 @@ const DSDashboard = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <StatCard
-            title="Pending Causes"
-            value={stats.pending}
-            icon={<FaHourglassHalf />}
-            color="yellow"
-          />
-          <StatCard
-            title="Approved Causes"
-            value={stats.approved}
-            icon={<FaCheckCircle />}
-            color="green"
-          />
-          <StatCard
-            title="Rejected Causes"
-            value={stats.rejected}
-            icon={<FaTimesCircle />}
-            color="red"
-          />
+          <StatCard title="Pending Causes" value={stats.pending} icon={<FaHourglassHalf />} color="yellow" />
+          <StatCard title="Approved Causes" value={stats.approved} icon={<FaCheckCircle />} color="green" />
+          <StatCard title="Rejected Causes" value={stats.rejected} icon={<FaTimesCircle />} color="red" />
         </div>
 
         {/* Monthly Analytics Chart */}
         <div className="bg-[#1F2937] p-6 rounded-xl shadow">
-          <h2 className="text-lg font-semibold text-primary mb-4">
-            Monthly DS Verification Stats
-          </h2>
+          <h2 className="text-lg font-semibold text-primary mb-4">Monthly DS Verification Stats</h2>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={monthlyAnalytics}>
               <XAxis dataKey="month" />
@@ -177,7 +175,9 @@ const DSDashboard = () => {
           </div>
 
           {causesLoading ? (
-            <p className="text-center py-4">Loading causes...</p>
+            <div className="flex justify-center items-center py-20">
+              <Spinner size={16} text="Loading causes..." />
+            </div>
           ) : allCauses.length === 0 ? (
             <p className="text-center py-4 text-gray-400">No causes found</p>
           ) : (
@@ -194,8 +194,7 @@ const DSDashboard = () => {
                     <span>{new Date(cause.createdAt).toLocaleDateString()}</span>
                   </div>
                   <div className="mt-2 text-xs text-gray-500">
-                    Amount: LKR {cause.requiredAmount.toLocaleString()} |
-                    Area: {cause.areaName}
+                    Amount: LKR {cause.requiredAmount.toLocaleString()} | Area: {cause.areaName}
                   </div>
                 </div>
               ))}
