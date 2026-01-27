@@ -5,7 +5,7 @@ const causeSchema = new mongoose.Schema(
     creator: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     title: String,
     description: String,
-    requiredAmount: Number,
+    requiredAmount: { type: Number, required: true, min: 1000 },
     beneficiaryName: String,
     beneficiaryContact: String,
     beneficiaryAddress: String, // NEW: Address field

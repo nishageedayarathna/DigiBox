@@ -4,12 +4,12 @@ const FeatureSection = () => {
   const features = [
     {
       title: "Verified Causes",
-      desc: "All causes are validated by local GS/AGA for authenticity.",
+      desc: "All causes are validated by local GS/DS officers for authenticity.",
       icon: "✅",
     },
     {
       title: "Micro-Donations",
-      desc: "Donate as little as $1 — every bit counts!",
+      desc: "Donate as little as Rs.20 & every bit counts!",
       icon: "💰",
     },
     {
