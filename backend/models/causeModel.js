@@ -9,6 +9,7 @@ const causeSchema = new mongoose.Schema(
     beneficiaryName: String,
     beneficiaryContact: String,
     beneficiaryAddress: String, // NEW: Address field
+    beneficiaryNIC: String, // NEW: NIC field
     beneficiaryAccountName: String,
     beneficiaryBank: String,
     beneficiaryAccountNumber: String,
@@ -49,5 +50,11 @@ const causeSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Performance indexes for frequent creator queries
+causeSchema.index({ creator: 1, createdAt: -1 });
+causeSchema.index({ creator: 1, dsStatus: 1 });
+causeSchema.index({ creator: 1, adminStatus: 1, gsStatus: 1, dsStatus: 1 });
+causeSchema.index({ creator: 1, createdAt: 1, dsStatus: 1 });
 
 module.exports = mongoose.model("Cause", causeSchema);

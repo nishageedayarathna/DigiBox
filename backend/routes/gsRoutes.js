@@ -114,7 +114,7 @@ router.get("/pending-causes", protect, authorize("gs"), async (req, res) => {
 /* ---------------- APPROVE CAUSE + GENERATE PDF ---------------- */
 router.put("/approve/:id", protect, authorize("gs"), async (req, res) => {
   try {
-    const { verificationNotes, signatureImage } = req.body;
+    const { verificationNotes, signatureImage, pdfDocument } = req.body;
     if (!verificationNotes || !signatureImage) return res.status(400).json({ message: "Notes and signature required" });
 
     const cause = await Cause.findById(req.params.id).populate("creator");
@@ -133,37 +133,15 @@ router.put("/approve/:id", protect, authorize("gs"), async (req, res) => {
     const uploadDir = path.join(__dirname, "../uploads");
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-    // PDF generation with letterhead
-    const pdfPath = path.join(uploadDir, `gs_approval_${cause._id}.pdf`);
-    const doc = new PDFDocument({ size: "A4", margin: 50 });
-    doc.pipe(fs.createWriteStream(pdfPath));
+    // Save the formatted PDF from frontend
+    if (pdfDocument) {
+      const pdfPath = path.join(uploadDir, `gs_approval_${cause._id}.pdf`);
+      const base64Data = pdfDocument.replace(/^data:application\/pdf;filename=generated\.pdf;base64,/, '');
+      const pdfBuffer = Buffer.from(base64Data, 'base64');
+      fs.writeFileSync(pdfPath, pdfBuffer);
+      cause.gsDocument = `/uploads/gs_approval_${cause._id}.pdf`;
+    }
 
-    // Optional logo
-    const logoPath = path.join(__dirname, "../public/logo.png");
-    if (fs.existsSync(logoPath)) doc.image(logoPath, 50, 45, { width: 100 });
-
-    doc.fontSize(20).text("GS Approval Letter", 105, 150, { align: "center" });
-    doc.moveDown(2);
-    doc.fontSize(12);
-    doc.text(`Date: ${new Date().toLocaleDateString()}`);
-    doc.text(`Cause Title: ${cause.title}`);
-    doc.text(`Creator: ${cause.creator.username}`);
-    doc.text(`Amount Required: LKR ${cause.requiredAmount}`);
-    doc.text(`Beneficiary: ${cause.beneficiaryName}`);
-    doc.moveDown();
-    doc.text("Verification Notes:");
-    doc.text(verificationNotes);
-    doc.moveDown();
-
-    // Add signature
-    const imgBuffer = Buffer.from(signatureImage.replace(/^data:image\/\w+;base64,/, ""), "base64");
-    doc.image(imgBuffer, { width: 150 });
-    doc.text(`Signed by: ${req.user.username}`);
-
-    doc.end();
-
-    // Save PDF path
-    cause.gsDocument = `/uploads/gs_approval_${cause._id}.pdf`;
     await cause.save();
 
     // Notify DS officer

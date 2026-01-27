@@ -298,6 +298,7 @@ const CauseDetails = () => {
                   <div className="space-y-2 text-sm">
                     <p><strong>Name:</strong> {cause.beneficiaryName}</p>
                     <p><strong>Contact:</strong> {cause.beneficiaryContact}</p>
+                    <p><strong>NIC:</strong> {cause.beneficiaryNIC}</p>
                     <p><strong>Bank:</strong> {cause.beneficiaryBank}</p>
                     <p><strong>Account:</strong> {cause.beneficiaryAccountName}</p>
                   </div>

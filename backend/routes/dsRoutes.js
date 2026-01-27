@@ -108,7 +108,7 @@ router.get("/pending-causes", protect, authorize("ds"), async (req, res) => {
 /* ---------------- APPROVE CAUSE ---------------- */
 router.put("/approve/:id", protect, authorize("ds"), async (req, res) => {
   try {
-    const { approvalNote, signatureImage } = req.body;
+    const { approvalNote, signatureImage, pdfDocument } = req.body;
     if (!approvalNote || !signatureImage)
       return res.status(400).json({ message: "Approval note & signature required" });
 
@@ -128,25 +128,15 @@ router.put("/approve/:id", protect, authorize("ds"), async (req, res) => {
     const uploadDir = path.join(__dirname, "../uploads");
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-    const pdfPath = path.join(uploadDir, `ds_approval_${cause._id}.pdf`);
-    const doc = new PDFDocument();
-    doc.pipe(fs.createWriteStream(pdfPath));
+    // Save the formatted PDF from frontend
+    if (pdfDocument) {
+      const pdfPath = path.join(uploadDir, `ds_approval_${cause._id}.pdf`);
+      const base64Data = pdfDocument.replace(/^data:application\/pdf;filename=generated\.pdf;base64,/, '');
+      const pdfBuffer = Buffer.from(base64Data, 'base64');
+      fs.writeFileSync(pdfPath, pdfBuffer);
+      cause.dsDocument = `/uploads/ds_approval_${cause._id}.pdf`;
+    }
 
-    doc.fontSize(18).text("DS Approval Letter", { align: "center" });
-    doc.moveDown();
-    doc.text(`Cause: ${cause.title}`);
-    doc.text(`Division: ${cause.divisionName}`);
-    doc.moveDown();
-    doc.text("Approval Note:");
-    doc.text(approvalNote);
-    doc.moveDown();
-
-    const img = Buffer.from(signatureImage.split(",")[1], "base64");
-    doc.image(img, { width: 150 });
-    doc.text(`Signed by DS Officer: ${req.user.username}`);
-    doc.end();
-
-    cause.dsDocument = `/uploads/ds_approval_${cause._id}.pdf`;
     await cause.save();
 
     // Notify Admin

@@ -32,7 +32,6 @@ import ResetPassword from "./pages/gs/ResetPassword";
 import DSDashboard from "./pages/ds/DSDashboard";
 import DSPendingCauses from "./pages/ds/DSPendingCauses";
 import DSDocuments from "./pages/ds/DSDocuments";
-import DSResetPassword from "./pages/ds/DSResetPassword";
 
 /* Donor */
 import DonorDashboard from "./pages/donor/DonorDashboard";
@@ -95,7 +94,6 @@ const AppContent = () => {
           <Route path="/ds/ds-dashboard" element={<DSDashboard />} />
           <Route path="/ds/ds-pendingcauses" element={<DSPendingCauses />} />
           <Route path="/ds/ds-documents" element={<DSDocuments />} />
-          <Route path="/ds/ds-resetpassword" element={<DSResetPassword />} />
           <Route path="/ds/profile" element={<Profile />} />
 
           {/* Donor */}
@@ -116,7 +114,7 @@ const AppContent = () => {
 
 function App() {
   return (
-    <Router future={{ v7_relativeSplatPath: true }}>
+    <Router future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
       <AppContent />
     </Router>
   );

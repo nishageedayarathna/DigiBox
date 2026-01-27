@@ -8,7 +8,7 @@ const router = express.Router();
 // ==================== GET PROFILE ====================
 router.get("/", protect, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    const user = await User.findById(req.user._id).select("-password");
     
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -41,7 +41,7 @@ router.get("/", protect, async (req, res) => {
 router.put("/", protect, async (req, res) => {
   try {
     const { username, email } = req.body;
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user._id);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -95,7 +95,7 @@ router.put("/upload-image", protect, async (req, res) => {
       return res.status(400).json({ message: "Profile image is required" });
     }
 
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -138,7 +138,7 @@ router.put("/reset-password", protect, async (req, res) => {
       });
     }
 
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

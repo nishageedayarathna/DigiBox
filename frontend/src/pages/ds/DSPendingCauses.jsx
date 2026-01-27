@@ -52,20 +52,179 @@ const DSPendingCauses = () => {
     reader.readAsDataURL(signature);
     reader.onloadend = () => {
       const doc = new jsPDF();
-      doc.setFontSize(18);
-      doc.text("DS Approval Letter", 105, 20, { align: "center" });
-
+      
+      // ========== LETTERHEAD DESIGN ==========
+      // Header background
+      doc.setFillColor(99, 102, 241); // Indigo color
+      doc.rect(0, 0, 210, 35, 'F');
+      
+      // Logo placeholder circle
+      doc.setFillColor(255, 255, 255);
+      doc.circle(20, 17, 8, 'F');
+      doc.setTextColor(99, 102, 241);
+      doc.setFontSize(10);
+      doc.text("DB", 16.5, 19);
+      
+      // Organization name
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(20);
+      doc.setFont(undefined, 'bold');
+      doc.text("DigiBox - Divisional Secretariat", 105, 15, { align: "center" });
+      
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text("Final Approval & Authorization Document", 105, 23, { align: "center" });
+      
+      // Decorative line
+      doc.setDrawColor(139, 92, 246);
+      doc.setLineWidth(0.5);
+      doc.line(20, 32, 190, 32);
+      
+      // ========== DOCUMENT TITLE ==========
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(16);
+      doc.setFont(undefined, 'bold');
+      doc.text("DIVISIONAL SECRETARY - FINAL APPROVAL CERTIFICATE", 105, 45, { align: "center" });
+      
+      // Reference number
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(100, 100, 100);
+      const refNumber = `DS/${new Date().getFullYear()}/` + Math.random().toString(36).substr(2, 6).toUpperCase();
+      doc.text(`Reference No: ${refNumber}`, 105, 52, { align: "center" });
+      doc.text(`Date: ${new Date().toLocaleDateString('en-GB')}`, 105, 57, { align: "center" });
+      
+      // ========== CAUSE INFORMATION SECTION ==========
+      doc.setTextColor(0, 0, 0);
       doc.setFontSize(12);
-      doc.text(`Cause Title: ${selectedCause.title}`, 20, 40);
-      doc.text(`Beneficiary: ${selectedCause.beneficiaryName}`, 20, 50);
-      doc.text(`Amount: LKR ${selectedCause.requiredAmount}`, 20, 60);
-      doc.text(`Area: ${selectedCause.divisionName}, ${selectedCause.districtName}`, 20, 70);
-      doc.text("Approval Notes:", 20, 80);
-      doc.text(notes, 20, 90, { maxWidth: 170 });
-
-      const img = reader.result;
-      doc.addImage(img, "PNG", 20, 120, 50, 25);
-      doc.text(`Signed by DS Officer: ${selectedCause.dsOfficer?.username || "You"}`, 20, 160);
+      doc.setFont(undefined, 'bold');
+      doc.text("Cause Details", 20, 68);
+      
+      // Box around cause info
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.3);
+      doc.rect(20, 70, 170, 55);
+      
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      let yPos = 76;
+      doc.setFont(undefined, 'bold');
+      doc.text("Title:", 25, yPos);
+      doc.setFont(undefined, 'normal');
+      doc.text(selectedCause.title, 55, yPos, { maxWidth: 130 });
+      
+      yPos += 7;
+      doc.setFont(undefined, 'bold');
+      doc.text("Beneficiary:", 25, yPos);
+      doc.setFont(undefined, 'normal');
+      doc.text(selectedCause.beneficiaryName, 55, yPos);
+      
+      yPos += 7;
+      doc.setFont(undefined, 'bold');
+      doc.text("NIC Number:", 25, yPos);
+      doc.setFont(undefined, 'normal');
+      doc.text(selectedCause.beneficiaryNIC || "N/A", 55, yPos);
+      
+      yPos += 7;
+      doc.setFont(undefined, 'bold');
+      doc.text("Required Amount:", 25, yPos);
+      doc.setFont(undefined, 'normal');
+      doc.text(`LKR ${Number(selectedCause.requiredAmount).toLocaleString('en-US')}`, 55, yPos);
+      
+      yPos += 7;
+      doc.setFont(undefined, 'bold');
+      doc.text("Location:", 25, yPos);
+      doc.setFont(undefined, 'normal');
+      doc.text(`${selectedCause.divisionName}, ${selectedCause.districtName}`, 55, yPos);
+      
+      yPos += 7;
+      doc.setFont(undefined, 'bold');
+      doc.text("GS Area:", 25, yPos);
+      doc.setFont(undefined, 'normal');
+      doc.text(selectedCause.areaName, 55, yPos);
+      
+      yPos += 7;
+      doc.setFont(undefined, 'bold');
+      doc.text("GS Verification:", 25, yPos);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(34, 197, 94); // Green
+      doc.text("✓ Verified by GS Officer", 55, yPos);
+      doc.setTextColor(0, 0, 0);
+      
+      // ========== APPROVAL SECTION ==========
+      yPos = 132;
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text("Final Approval Notes", 20, yPos);
+      
+      // Box for notes
+      doc.setLineWidth(0.3);
+      doc.rect(20, yPos + 2, 170, 35);
+      
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'normal');
+      doc.text(notes, 25, yPos + 8, { maxWidth: 160, lineHeightFactor: 1.5 });
+      
+      // Decision stamp
+      doc.setFillColor(34, 197, 94);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(14);
+      doc.rect(140, yPos + 8, 45, 12, 'F');
+      doc.text("APPROVED", 162.5, yPos + 16, { align: "center" });
+      
+      // ========== SIGNATURE SECTION ==========
+      yPos = 177;
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(11);
+      doc.setFont(undefined, 'bold');
+      doc.text("Authorized and Approved by:", 20, yPos);
+      
+      // Signature box
+      doc.setLineWidth(0.3);
+      doc.rect(20, yPos + 3, 70, 35);
+      doc.addImage(reader.result, "PNG", 25, yPos + 5, 60, 28);
+      
+      // Officer details
+      yPos += 40;
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text(`${selectedCause.dsOfficer?.username || "DS Officer"}`, 20, yPos);
+      doc.setFont(undefined, 'normal');
+      doc.text("Divisional Secretary", 20, yPos + 5);
+      doc.text(`${selectedCause.divisionName}`, 20, yPos + 10);
+      doc.text(`${selectedCause.districtName}`, 20, yPos + 15);
+      
+      // Official stamp
+      doc.setDrawColor(99, 102, 241);
+      doc.setLineWidth(1.5);
+      doc.circle(150, yPos - 5, 18, 'S');
+      doc.setFontSize(9);
+      doc.setTextColor(99, 102, 241);
+      doc.setFont(undefined, 'bold');
+      doc.text("OFFICIAL", 143, yPos - 8);
+      doc.text("SEAL", 146, yPos - 3);
+      doc.setFontSize(7);
+      doc.text("DIVISIONAL", 141, yPos + 2);
+      doc.text("SECRETARIAT", 139, yPos + 6);
+      
+      // ========== FOOTER ==========
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.3);
+      doc.line(20, 265, 190, 265);
+      
+      doc.setTextColor(100, 100, 100);
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'italic');
+      doc.text("This is an official computer-generated document with digital authentication.", 105, 270, { align: "center" });
+      doc.text("Valid for fundraising purposes on the DigiBox platform.", 105, 275, { align: "center" });
+      
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(99, 102, 241);
+      doc.text("Powered by: DigiBox", 105, 282, { align: "center" });
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(7);
+      doc.text("Digital Community Fundraising Platform", 105, 287, { align: "center" });
 
       const blob = doc.output("blob");
       setPdfPreview(URL.createObjectURL(blob));
@@ -208,6 +367,7 @@ const DSPendingCauses = () => {
                 <p className="text-gray-300 font-semibold mb-2">👤 Beneficiary Information</p>
                 <p className="text-sm text-gray-300"><span className="text-gray-500">Name:</span> {selectedCause.beneficiaryName}</p>
                 <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Phone:</span> {selectedCause.beneficiaryContact}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">NIC Number:</span> {selectedCause.beneficiaryNIC}</p>
                 <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Address:</span> {selectedCause.beneficiaryAddress}</p>
                 <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Bank:</span> {selectedCause.beneficiaryBank}</p>
                 <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Account Name:</span> {selectedCause.beneficiaryAccountName}</p>

@@ -10,7 +10,6 @@ const AdminDashboard = () => {
   const [allCauses, setAllCauses] = useState([]);
   const [filterStatus, setFilterStatus] = useState("all");
   const [loading, setLoading] = useState(false);
-  const [loadingStats, setLoadingStats] = useState(true); // Loading for stats
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -20,8 +19,7 @@ const AdminDashboard = () => {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setStats(res.data))
-      .catch(console.error)
-      .finally(() => setLoadingStats(false));
+      .catch(console.error);
 
     axios
       .get("http://localhost:5000/api/admin/analytics/pie", {
@@ -82,17 +80,7 @@ const AdminDashboard = () => {
     return <span className="px-2 py-1 bg-yellow-600 text-white text-xs rounded">Pending Review</span>;
   };
 
-  // Centered loading spinner for stats
-  if (loadingStats) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-[#111827]">
-        <div className="flex flex-col items-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-white text-xl mt-4">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+  if (!stats) return <p className="text-white p-6">Loading...</p>;
 
   return (
     <div className="flex bg-[#111827] min-h-screen text-white">
@@ -119,9 +107,7 @@ const AdminDashboard = () => {
           <h2 className="text-xl mb-4 text-primary">
             Cause Approval Distribution
           </h2>
-          <div className="w-full h-80 flex items-center justify-center">
-            <PieChartView data={pieData} />
-          </div>
+          <PieChartView data={pieData} />
         </div>
 
         {/* RECEIVED CAUSES */}
@@ -146,12 +132,7 @@ const AdminDashboard = () => {
           </div>
 
           {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="flex flex-col items-center">
-                <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-white text-lg mt-3">Loading causes...</p>
-              </div>
-            </div>
+            <p className="text-center py-4">Loading causes...</p>
           ) : allCauses.length === 0 ? (
             <p className="text-center py-4 text-gray-400">No causes found</p>
           ) : (

@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname.replace(/\s+/g, "_")),
 });
 const fileFilter = (req, file, cb) => {
-  const allowed = ["image/jpeg", "image/png", "application/pdf"];
+  const allowed = ["application/pdf"];
   cb(null, allowed.includes(file.mimetype));
 };
 const upload = multer({ storage, fileFilter });
@@ -20,36 +20,58 @@ const upload = multer({ storage, fileFilter });
 /* ---------- Create Cause ---------- */
 router.post("/create", protect, authorize("creator"), upload.single("evidenceFile"), async (req, res) => {
   try {
+    // File validation
     if (!req.file) return res.status(400).json({ message: "Evidence file required" });
-    if (req.file.size > 5 * 1024 * 1024) return res.status(400).json({ message: "File > 5MB" });
+    if (req.file.size > 2 * 1024 * 1024) return res.status(400).json({ message: "File exceeds 2MB limit. Please compress your PDF or reduce image quality." });
 
-    // Validate contact and account
-    if (!/^07\d{8}$/.test(req.body.beneficiaryContact)) return res.status(400).json({ message: "Invalid contact" });
-    if (!/^\d{6,20}$/.test(req.body.beneficiaryAccountNumber)) return res.status(400).json({ message: "Invalid account" });
-    if (!req.body.beneficiaryAddress || req.body.beneficiaryAddress.trim().length < 10) {
-      return res.status(400).json({ message: "Beneficiary address is required and must be at least 10 characters" });
+    // Validate all required fields
+    const { title, description, category, requiredAmount, beneficiaryName, beneficiaryContact, beneficiaryAddress, beneficiaryNIC, beneficiaryAccountName, beneficiaryBank, beneficiaryAccountNumber, beneficiaryBranch, areaCode } = req.body;
+    
+    if (!title || title.length < 10) return res.status(400).json({ message: "Title must be at least 10 characters" });
+    if (!description || description.length < 30) return res.status(400).json({ message: "Description must be at least 30 characters" });
+    if (!category) return res.status(400).json({ message: "Category is required" });
+    if (!requiredAmount || Number(requiredAmount) < 1000) return res.status(400).json({ message: "Required amount must be at least LKR 1,000" });
+    
+    if (!beneficiaryName || beneficiaryName.length < 3) return res.status(400).json({ message: "Beneficiary name must be at least 3 characters" });
+    if (!beneficiaryContact || !/^07\d{8}$/.test(beneficiaryContact)) return res.status(400).json({ message: "Invalid Sri Lankan contact number (07XXXXXXXX)" });
+    if (!beneficiaryAddress || beneficiaryAddress.trim().length < 10) return res.status(400).json({ message: "Beneficiary address must be at least 10 characters" });
+    if (!beneficiaryNIC || !((/^\d{12}$/.test(beneficiaryNIC)) || (/^\d{9}[VvXx]$/.test(beneficiaryNIC)))) return res.status(400).json({ message: "Invalid NIC number. Must be 12 digits or 9 digits followed by V/X" });
+    
+    if (!beneficiaryAccountName || beneficiaryAccountName.length < 3) return res.status(400).json({ message: "Account name must be at least 3 characters" });
+    if (!beneficiaryBank || beneficiaryBank.length < 3) return res.status(400).json({ message: "Bank name must be at least 3 characters" });
+    if (!beneficiaryAccountNumber || !/^\d{6,20}$/.test(beneficiaryAccountNumber)) return res.status(400).json({ message: "Account number must be 6–20 digits" });
+    if (!beneficiaryBranch || beneficiaryBranch.length < 2) return res.status(400).json({ message: "Branch must be at least 2 characters" });
+    
+    if (!areaCode) return res.status(400).json({ message: "Area code (GS area) is required" });
+
+    // Map GS officer by area code
+    const gsOfficer = await User.findOne({ role: "gs", areaCode });
+    if (!gsOfficer) {
+      console.error(`No GS officer found for areaCode: ${areaCode}`);
+      return res.status(400).json({ message: `No GS officer assigned to area code: ${areaCode}` });
     }
 
-    // Map GS and DS automatically
-    const gsOfficer = await User.findOne({ role: "gs", areaCode: req.body.areaCode });
-    if (!gsOfficer) return res.status(400).json({ message: "Invalid GS area" });
-
+    // Map DS officer by division code
     const dsOfficer = await User.findOne({ role: "ds", divisionCode: gsOfficer.divisionCode });
-    if (!dsOfficer) return res.status(400).json({ message: "No DS found for this division" });
+    if (!dsOfficer) {
+      console.error(`No DS officer found for divisionCode: ${gsOfficer.divisionCode}`);
+      return res.status(400).json({ message: `No DS officer found for this division` });
+    }
 
     const cause = new Cause({
       creator: req.user._id,
-      title: req.body.title,
-      description: req.body.description,
-      category: req.body.category,
-      requiredAmount: Number(req.body.requiredAmount),
-      beneficiaryName: req.body.beneficiaryName,
-      beneficiaryContact: req.body.beneficiaryContact,
-      beneficiaryAddress: req.body.beneficiaryAddress,
-      beneficiaryAccountName: req.body.beneficiaryAccountName,
-      beneficiaryBank: req.body.beneficiaryBank,
-      beneficiaryAccountNumber: req.body.beneficiaryAccountNumber,
-      beneficiaryBranch: req.body.beneficiaryBranch,
+      title: title.trim(),
+      description: description.trim(),
+      category,
+      requiredAmount: Number(requiredAmount),
+      beneficiaryName: beneficiaryName.trim(),
+      beneficiaryContact: beneficiaryContact.trim(),
+      beneficiaryAddress: beneficiaryAddress.trim(),
+      beneficiaryNIC: beneficiaryNIC.trim().toUpperCase(),
+      beneficiaryAccountName: beneficiaryAccountName.trim(),
+      beneficiaryBank: beneficiaryBank.trim(),
+      beneficiaryAccountNumber: beneficiaryAccountNumber.trim(),
+      beneficiaryBranch: beneficiaryBranch.trim(),
       evidenceFile: `/uploads/${req.file.filename}`,
       evidenceFileType: req.file.mimetype === "application/pdf" ? "pdf" : "image",
 
@@ -65,17 +87,22 @@ router.post("/create", protect, authorize("creator"), upload.single("evidenceFil
     });
 
     await cause.save();
-    res.status(201).json({ message: "Cause created", cause });
-  } catch (err) { console.error(err); res.status(500).json({ message: err.message }); }
+    res.status(201).json({ message: "Cause created successfully", cause });
+  } catch (err) { 
+    console.error("Create cause error:", err); 
+    res.status(500).json({ message: err.message || "Error creating cause" }); 
+  }
 });
 
 /* ---------- Get My Causes ---------- */
 router.get("/my-causes", protect, authorize("creator"), async (req, res) => {
   try {
     const causes = await Cause.find({ creator: req.user._id })
+      .select("title description category requiredAmount fundsRaised donorsCount adminStatus gsStatus dsStatus finalStatus createdAt areaName divisionName districtName gsOfficer dsOfficer")
       .populate("gsOfficer", "username email")
       .populate("dsOfficer", "username email")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     const formatted = causes.map(cause => {
       let displayStatus = "Pending Admin Approval";
@@ -95,7 +122,7 @@ router.get("/my-causes", protect, authorize("creator"), async (req, res) => {
       }
 
       return {
-        ...cause.toObject(),
+        ...cause,
         displayStatus
       };
     });
@@ -142,29 +169,25 @@ router.get("/stats", protect, authorize("creator"), async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const totalCauses = await Cause.countDocuments({ creator: userId });
-
-    const approved = await Cause.countDocuments({
-      creator: userId,
-      dsStatus: "approved"
-    });
-
-    const rejected = await Cause.countDocuments({
-      creator: userId,
-      $or: [
-        { adminStatus: "rejected" },
-        { gsStatus: "rejected" },
-        { dsStatus: "rejected" }
-      ]
-    });
-
-    const pending = totalCauses - approved - rejected;
-
-    const totalFundsAgg = await Cause.aggregate([
-      { $match: { creator: userId, dsStatus: "approved" } },
-      { $group: { _id: null, total: { $sum: "$fundsRaised" } } }
+    // Run independent counts in parallel to reduce latency
+    const [totalCauses, approved, rejected, totalFundsAgg] = await Promise.all([
+      Cause.countDocuments({ creator: userId }),
+      Cause.countDocuments({ creator: userId, dsStatus: "approved" }),
+      Cause.countDocuments({
+        creator: userId,
+        $or: [
+          { adminStatus: "rejected" },
+          { gsStatus: "rejected" },
+          { dsStatus: "rejected" }
+        ]
+      }),
+      Cause.aggregate([
+        { $match: { creator: userId, dsStatus: "approved" } },
+        { $group: { _id: null, total: { $sum: "$fundsRaised" } } }
+      ])
     ]);
 
+    const pending = totalCauses - approved - rejected;
     const totalFunds = totalFundsAgg[0]?.total || 0;
 
     res.json({ totalCauses, approved, pending, rejected, totalFunds });
