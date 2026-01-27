@@ -3,6 +3,15 @@ import Sidebar from "../../components/dashboard/Sidebar";
 import axios from "axios";
 import { jsPDF } from "jspdf";
 
+const Modal = ({ title, onClose, children }) => (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-[#1F2937] rounded-lg p-6 max-w-2xl w-11/12 shadow-xl">
+      <h2 className="text-xl font-bold text-white mb-4">{title}</h2>
+      {children}
+    </div>
+  </div>
+);
+
 const PendingCauses = () => {
   const [causes, setCauses] = useState([]);
   const [selectedCause, setSelectedCause] = useState(null);
@@ -27,6 +36,16 @@ const PendingCauses = () => {
     } catch (err) {
       console.error("Error fetching pending causes:", err);
     }
+  };
+
+  const closeModals = () => {
+    setSelectedCause(null);
+    setShowApprove(false);
+    setShowReject(false);
+    setNotes("");
+    setReason("");
+    setSignature(null);
+    setPdfPreview(null);
   };
 
   /* ---------------- GENERATE PDF PREVIEW ---------------- */
@@ -103,15 +122,6 @@ const PendingCauses = () => {
     }
   };
 
-  const closeModals = () => {
-    setShowApprove(false);
-    setShowReject(false);
-    setSelectedCause(null);
-    setNotes("");
-    setReason("");
-    setSignature(null);
-    setPdfPreview(null);
-  };
 
   return (
     <div className="bg-[#111827] min-h-screen text-white flex">
@@ -128,6 +138,7 @@ const PendingCauses = () => {
               <tr>
                 <th className="p-3 text-left">Title</th>
                 <th className="p-3">Beneficiary</th>
+                <th className="p-3">Contact</th>
                 <th className="p-3">Amount</th>
                 <th className="p-3">Evidence</th>
                 <th className="p-3">Action</th>
@@ -135,16 +146,17 @@ const PendingCauses = () => {
             </thead>
             <tbody>
               {causes.map((c) => (
-                <tr key={c._id} className="border-b border-gray-700">
-                  <td className="p-3">{c.title}</td>
-                  <td className="p-3 text-center">{c.beneficiaryName}</td>
+                <tr key={c._id} className="border-b border-gray-700 hover:bg-[#374151]/50 transition">
+                  <td className="p-3 font-medium">{c.title}</td>
+                  <td className="p-3 text-center text-sm">{c.beneficiaryName}</td>
+                  <td className="p-3 text-center text-sm">{c.beneficiaryContact}</td>
                   <td className="p-3 text-center">LKR {c.requiredAmount}</td>
                   <td className="p-3 text-center">
                     <a
                       href={`http://localhost:5000${c.evidenceFile}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-primary underline"
+                      className="text-primary underline hover:text-primary-light"
                     >
                       View
                     </a>
@@ -152,15 +164,22 @@ const PendingCauses = () => {
                   <td className="p-3 flex justify-center gap-2">
                     <button
                       onClick={() => { setSelectedCause(c); setShowApprove(true); }}
-                      className="px-3 py-1 bg-green-600 rounded text-xs"
+                      className="px-3 py-1 bg-green-600 rounded text-xs hover:bg-green-700 transition"
                     >
                       Approve
                     </button>
                     <button
                       onClick={() => { setSelectedCause(c); setShowReject(true); }}
-                      className="px-3 py-1 bg-red-600 rounded text-xs"
+                      className="px-3 py-1 bg-red-600 rounded text-xs hover:bg-red-700 transition"
                     >
                       Reject
+                    </button>
+                    <button
+                      onClick={() => { setSelectedCause(c); }}
+                      className="px-3 py-1 bg-secondary rounded text-xs hover:bg-secondary-dark transition"
+                      title="View Details"
+                    >
+                      Details
                     </button>
                   </td>
                 </tr>
@@ -168,6 +187,67 @@ const PendingCauses = () => {
             </tbody>
           </table>
         </div>
+
+        {/* DETAILS MODAL */}
+        {selectedCause && !showApprove && !showReject && (
+          <Modal title={`${selectedCause.title} - Full Details`} onClose={closeModals}>
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-gray-400 text-sm">Creator</p>
+                  <p className="text-white font-medium">{selectedCause.creator?.username}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400 text-sm">Email</p>
+                  <p className="text-white font-medium">{selectedCause.creator?.email}</p>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-600 pt-3">
+                <p className="text-gray-300 font-semibold mb-2">📋 Cause Information</p>
+                <p className="text-sm text-gray-300"><span className="text-gray-500">Description:</span> {selectedCause.description}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Category:</span> {selectedCause.category}</p>
+              </div>
+
+              <div className="border-t border-gray-600 pt-3">
+                <p className="text-gray-300 font-semibold mb-2">👤 Beneficiary Information</p>
+                <p className="text-sm text-gray-300"><span className="text-gray-500">Name:</span> {selectedCause.beneficiaryName}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Phone:</span> {selectedCause.beneficiaryContact}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Address:</span> {selectedCause.beneficiaryAddress}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Bank:</span> {selectedCause.beneficiaryBank}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Account Name:</span> {selectedCause.beneficiaryAccountName}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Account #:</span> {selectedCause.beneficiaryAccountNumber}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Branch:</span> {selectedCause.beneficiaryBranch}</p>
+              </div>
+
+              <div className="border-t border-gray-600 pt-3">
+                <p className="text-gray-300 font-semibold mb-2">💰 Fund Information</p>
+                <p className="text-sm text-gray-300"><span className="text-gray-500">Required Amount:</span> LKR {selectedCause.requiredAmount}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Funds Raised:</span> LKR {selectedCause.fundsRaised || 0}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Donors Count:</span> {selectedCause.donorsCount || 0}</p>
+              </div>
+
+              <div className="border-t border-gray-600 pt-3">
+                <p className="text-gray-300 font-semibold mb-2">📄 Evidence File</p>
+                <a
+                  href={`http://localhost:5000${selectedCause.evidenceFile}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary underline hover:text-primary-light"
+                >
+                  View {selectedCause.evidenceFileType === "pdf" ? "PDF" : "Image"}
+                </a>
+              </div>
+
+              <button
+                onClick={closeModals}
+                className="w-full bg-gray-600 py-2 rounded mt-4"
+              >
+                Close
+              </button>
+            </div>
+          </Modal>
+        )}
       </main>
 
       {/* ---------------- APPROVE MODAL ---------------- */}
@@ -255,20 +335,5 @@ const PendingCauses = () => {
     </div>
   );
 };
-
-/* ---------------- MODAL ---------------- */
-const Modal = ({ title, children, onClose }) => (
-  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-    <div className="bg-[#1F2937] p-6 rounded-xl w-[400px]">
-      <div className="flex justify-between mb-4">
-        <h2 className="text-lg font-semibold text-primary">{title}</h2>
-        <button onClick={onClose} className="text-gray-400">
-          ✕
-        </button>
-      </div>
-      {children}
-    </div>
-  </div>
-);
 
 export default PendingCauses;

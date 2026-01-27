@@ -12,7 +12,7 @@ import {
 
 const AnalyticsChart = ({ data, showLabels = true }) => {
   return (
-    <div className="w-full h-80">
+    <div className="w-full h-80 min-h-80" style={{ minHeight: '320px' }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#374151" />

@@ -10,7 +10,7 @@ import {
 
 const PieChartView = ({ data }) => {
   return (
-    <div className="w-full h-[350px] flex justify-center items-center">
+    <div className="w-full h-80 min-h-80 flex justify-center items-center" style={{ minHeight: '320px' }}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie

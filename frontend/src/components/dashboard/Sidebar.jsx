@@ -53,8 +53,7 @@ const Sidebar = ({ role = "creator" }) => {
   { path: "/ds/ds-dashboard", label: "Dashboard", icon: <FaHome /> },
   { path: "/ds/ds-pendingcauses", label: "Pending Causes", icon: <FaClipboardList /> },
   { path: "/ds/ds-documents", label: "Documents", icon: <FaList /> },
-  { path: "/ds/profile", label: "Profile", icon: <FaUserCircleist /> },
-  { path: "/ds/ds-documents", label: "Documents", icon: <FaList /> },
+  { path: "/ds/profile", label: "Profile", icon: <FaUserCircle /> },
   { path: "/ds/ds-resetpassword", label: "Reset Password", icon: <FaUserShield /> },
 ],
 

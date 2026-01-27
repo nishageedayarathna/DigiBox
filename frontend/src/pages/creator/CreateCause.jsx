@@ -15,6 +15,7 @@ const CreateCause = () => {
     requiredAmount: "",
     beneficiaryName: "",
     beneficiaryContact: "",
+    beneficiaryAddress: "",
     beneficiaryAccountName: "",
     beneficiaryBank: "",
     beneficiaryAccountNumber: "",
@@ -71,6 +72,8 @@ const CreateCause = () => {
       v.length >= 3 ? "" : "Name must be at least 3 characters.",
     beneficiaryContact: (v) =>
       /^07\d{8}$/.test(v) ? "" : "Enter a valid Sri Lankan number.",
+    beneficiaryAddress: (v) =>
+      v.length >= 10 ? "" : "Address must be at least 10 characters.",
     beneficiaryAccountName: (v) =>
       v.length >= 3 ? "" : "Account name must be at least 3 characters.",
     beneficiaryBank: (v) =>
@@ -160,6 +163,7 @@ const CreateCause = () => {
         requiredAmount: "",
         beneficiaryName: "",
         beneficiaryContact: "",
+        beneficiaryAddress: "",
         beneficiaryAccountName: "",
         beneficiaryBank: "",
         beneficiaryAccountNumber: "",
@@ -286,6 +290,19 @@ const CreateCause = () => {
                 className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg"
               />
               {renderError(errors.beneficiaryContact)}
+            </div>
+
+            <div>
+              <label>Beneficiary Address</label>
+              <textarea
+                name="beneficiaryAddress"
+                value={formData.beneficiaryAddress}
+                onChange={handleChange}
+                rows="3"
+                placeholder="Enter full residential address (street, city, postal code)"
+                className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg"
+              />
+              {renderError(errors.beneficiaryAddress)}
             </div>
 
             {/* CASCADING DROPDOWNS */}

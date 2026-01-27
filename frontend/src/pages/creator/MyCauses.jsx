@@ -73,6 +73,72 @@ const MyCauses = () => {
                   Created At: {new Date(cause.createdAt).toLocaleDateString()}
                 </p>
 
+                {/* Fund Collection Status */}
+                {cause.status === "approved" && (
+                  <div className="mt-4 pt-4 border-t border-gray-600">
+                    <p className="text-sm font-semibold text-gray-300 mb-2">💰 Fund Collection Status</p>
+                    
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-400">Progress</span>
+                        <span className="text-xs font-semibold text-secondary">
+                          {Math.round(((cause.fundsRaised || 0) / cause.requiredAmount) * 100)}%
+                        </span>
+                      </div>
+                      
+                      {/* Progress Bar */}
+                      <div className="bg-gray-700 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-primary to-secondary h-full transition-all duration-300"
+                          style={{
+                            width: `${Math.min(((cause.fundsRaised || 0) / cause.requiredAmount) * 100, 100)}%`,
+                          }}
+                        ></div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2 text-xs mt-3">
+                        <div className="bg-[#374151] p-2 rounded">
+                          <p className="text-gray-400">Target</p>
+                          <p className="font-semibold text-white">
+                            LKR {cause.requiredAmount}
+                          </p>
+                        </div>
+                        <div className="bg-[#374151] p-2 rounded">
+                          <p className="text-gray-400">Raised</p>
+                          <p className="font-semibold text-secondary">
+                            LKR {cause.fundsRaised || 0}
+                          </p>
+                        </div>
+                        <div className="bg-[#374151] p-2 rounded">
+                          <p className="text-gray-400">Remaining</p>
+                          <p className="font-semibold text-primary">
+                            LKR {Math.max(0, cause.requiredAmount - (cause.fundsRaised || 0))}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-2 text-xs">
+                        <p className="text-gray-400">
+                          <span className="font-semibold">{cause.donorsCount || 0}</span> donors contributed
+                        </p>
+                        <p className={`text-xs font-semibold mt-1 ${
+                          (cause.fundsRaised || 0) >= cause.requiredAmount
+                            ? "text-green-400"
+                            : (cause.fundsRaised || 0) > 0
+                            ? "text-yellow-400"
+                            : "text-gray-400"
+                        }`}>
+                          {(cause.fundsRaised || 0) >= cause.requiredAmount
+                            ? "✓ Target Achieved"
+                            : (cause.fundsRaised || 0) > 0
+                            ? "⟳ Ongoing"
+                            : "⏳ Not Started"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Evidence File link */}
                 <a
                   href={`http://localhost:5000${cause.evidenceFile}`}
@@ -81,7 +147,7 @@ const MyCauses = () => {
                   className="text-primary mt-3 inline-block underline hover:text-secondary"
                 >
                   View Evidence
-                </a> 
+                </a>
 
               </div>
             ))}

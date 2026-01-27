@@ -107,7 +107,9 @@ const AdminDashboard = () => {
           <h2 className="text-xl mb-4 text-primary">
             Cause Approval Distribution
           </h2>
-          <PieChartView data={pieData} />
+          <div className="w-full h-80 flex items-center justify-center">
+            <PieChartView data={pieData} />
+          </div>
         </div>
 
         {/* RECEIVED CAUSES */}
