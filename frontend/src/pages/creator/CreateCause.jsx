@@ -16,6 +16,7 @@ const CreateCause = () => {
     beneficiaryName: "",
     beneficiaryContact: "",
     beneficiaryAddress: "",
+    beneficiaryNIC: "",
     beneficiaryAccountName: "",
     beneficiaryBank: "",
     beneficiaryAccountNumber: "",
@@ -74,6 +75,8 @@ const CreateCause = () => {
       /^07\d{8}$/.test(v) ? "" : "Enter a valid Sri Lankan number.",
     beneficiaryAddress: (v) =>
       v.length >= 10 ? "" : "Address must be at least 10 characters.",
+    beneficiaryNIC: (v) =>
+      /^\d{12}$/.test(v) || /^\d{9}[VvXx]$/.test(v) ? "" : "Enter a valid NIC (12 digits or 9 digits + V/X).",
     beneficiaryAccountName: (v) =>
       v.length >= 3 ? "" : "Account name must be at least 3 characters.",
     beneficiaryBank: (v) =>
@@ -104,14 +107,14 @@ const CreateCause = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const allowed = ["application/pdf", "image/jpeg", "image/png"];
+    const allowed = ["application/pdf"];
     if (!allowed.includes(file.type)) {
-      setErrors((p) => ({ ...p, evidence: "Only PDF, JPG, PNG allowed." }));
+      setErrors((p) => ({ ...p, evidence: "Only PDF files are allowed. Please combine all documents into a single PDF." }));
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      setErrors((p) => ({ ...p, evidence: "File must be under 5MB." }));
+    if (file.size > 2 * 1024 * 1024) {
+      setErrors((p) => ({ ...p, evidence: "File must be under 2MB. Please compress your PDF." }));
       return;
     }
 
@@ -184,7 +187,9 @@ const CreateCause = () => {
         setSuccessMessage("");
       }, 3000);
     } catch (err) {
-      alert(err.response?.data?.message || "Error submitting cause");
+      const errorMsg = err.response?.data?.message || err.message || "Error submitting cause";
+      console.error("Submission error:", err);
+      alert(`❌ Error: ${errorMsg}`);
     }
   };
 
@@ -305,6 +310,18 @@ const CreateCause = () => {
               {renderError(errors.beneficiaryAddress)}
             </div>
 
+            <div>
+              <label>Beneficiary NIC Number</label>
+              <input
+                name="beneficiaryNIC"
+                value={formData.beneficiaryNIC}
+                onChange={handleChange}
+                placeholder="Enter 12 digits (e.g., 200012345678) or 9 digits + V/X (e.g., 123456789V)"
+                className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg"
+              />
+              {renderError(errors.beneficiaryNIC)}
+            </div>
+
             {/* CASCADING DROPDOWNS */}
             <h2 className="text-xl font-bold text-primary pt-4">Select Area</h2>
 
@@ -392,12 +409,71 @@ const CreateCause = () => {
                 </div>
             ))}
 
-            {/* FILE */}
-            <div>
-              <label>Upload Evidence</label>
-              <input type="file" accept=".pdf,.jpg,.jpeg,.png"
-                onChange={handleFileChange} />
-              {renderError(errors.evidence)}
+            {/* EVIDENCE FILE */}
+            <div className="border border-yellow-600 rounded-lg p-4 bg-yellow-900/20">
+              <h2 className="text-xl font-bold text-primary mb-3">Upload Evidence Document</h2>
+              
+              <div className="bg-[#1e293b] border-l-4 border-yellow-500 p-4 mb-4 rounded">
+                <p className="text-yellow-400 font-semibold mb-2 flex items-center">
+                  <span className="text-2xl mr-2">⚠️</span>
+                  IMPORTANT: Required Documents
+                </p>
+                <p className="text-gray-300 text-sm mb-3">
+                  Your evidence file MUST include the following documents combined into a SINGLE PDF:
+                </p>
+                <ul className="list-disc list-inside space-y-2 text-gray-300 text-sm ml-4">
+                  <li><strong>Both sides of NIC</strong> - Clear photos of front and back of National Identity Card</li>
+                  <li><strong>Valid evidence documents</strong> - Medical reports, bills, certificates, or other supporting documents</li>
+                  <li><strong>Bank statement</strong> - Front page of the beneficiary's bank book showing account details</li>
+                </ul>
+                <p className="text-yellow-300 text-xs mt-3 font-medium">
+                  📄 Combine all documents into ONE PDF file (max 2MB). Use online PDF tools to merge and compress if needed.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-white font-medium">Select PDF File</label>
+                <div className="flex items-center gap-3">
+                  <label className="flex-1 cursor-pointer">
+                    <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 hover:border-primary transition text-center">
+                      {evidence ? (
+                        <div className="space-y-2">
+                          <p className="text-green-400 font-medium">✓ File Selected</p>
+                          <p className="text-gray-300 text-sm">{evidence.name}</p>
+                          <p className="text-gray-400 text-xs">
+                            Size: {(evidence.size / 1024).toFixed(2)} KB
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <div className="text-4xl">📄</div>
+                          <p className="text-gray-300 font-medium">Click to upload PDF</p>
+                          <p className="text-gray-500 text-sm">Maximum file size: 2MB</p>
+                        </div>
+                      )}
+                    </div>
+                    <input 
+                      type="file" 
+                      accept=".pdf" 
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                  {evidence && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEvidence(null);
+                        setErrors((p) => ({ ...p, evidence: "" }));
+                      }}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+                {renderError(errors.evidence)}
+              </div>
             </div>
 
             <button className="w-full py-3 bg-primary rounded-lg font-semibold hover:bg-secondary">

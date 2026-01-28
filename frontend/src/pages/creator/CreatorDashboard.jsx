@@ -12,6 +12,7 @@ const CreatorDashboard = () => {
   const [activeView, setActiveView] = useState("dashboard");
   const [stats, setStats] = useState(null);
   const [recentCauses, setRecentCauses] = useState([]);
+  const [activeCauses, setActiveCauses] = useState([]);
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true); // Loading state
 
@@ -28,6 +29,12 @@ const CreatorDashboard = () => {
 
         setStats(statsRes.data);
         setRecentCauses(recentRes.data.slice(0, 5));
+        
+        // Filter active/approved causes with published status
+        const activeApprovedCauses = recentRes.data.filter(
+          cause => cause.finalStatus === "approved" || cause.dsStatus === "approved"
+        );
+        setActiveCauses(activeApprovedCauses);
 
         const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
         const formatted = chartRes.data.map(d => ({ month: months[d.month - 1], causes: d.count }));
@@ -81,6 +88,67 @@ const CreatorDashboard = () => {
               <h2 className="text-xl font-semibold mb-4 text-primary">Monthly Causes Created</h2>
               <AnalyticsChart data={chartData} showLabels />
             </div>
+
+            {/* Active Causes with Donation Progress */}
+            {activeCauses.length > 0 && (
+              <div className="bg-[#1F2937] p-6 rounded-2xl shadow-lg mb-10">
+                <h2 className="text-xl font-semibold mb-6 text-primary">Active Causes - Donation Progress</h2>
+                <div className="space-y-6">
+                  {activeCauses.map((cause) => {
+                    const progress = Math.min(((cause.fundsRaised || 0) / cause.requiredAmount) * 100, 100);
+                    const remaining = Math.max(0, cause.requiredAmount - (cause.fundsRaised || 0));
+                    
+                    return (
+                      <div key={cause._id} className="bg-[#111827] p-5 rounded-lg border border-gray-700 hover:border-primary transition">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex-1">
+                            <h3 className="text-lg font-semibold text-white mb-1">{cause.title}</h3>
+                            <p className="text-sm text-gray-400">{cause.category} • Created {new Date(cause.createdAt).toLocaleDateString()}</p>
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            progress >= 100 ? 'bg-green-600 text-white' : 
+                            progress > 0 ? 'bg-yellow-600 text-white' : 
+                            'bg-gray-600 text-white'
+                          }`}>
+                            {progress >= 100 ? '✓ Target Achieved' : progress > 0 ? '⟳ Ongoing' : '⏳ Not Started'}
+                          </span>
+                        </div>
+
+                        {/* Progress Bar */}
+                        <div className="mb-4">
+                          <div className="flex justify-between text-sm text-gray-400 mb-2">
+                            <span>Progress: {progress.toFixed(1)}%</span>
+                            <span>{cause.donorsCount || 0} donors</span>
+                          </div>
+                          <div className="bg-gray-700 rounded-full h-3 overflow-hidden">
+                            <div
+                              className="bg-gradient-to-r from-primary to-secondary h-full transition-all duration-300 rounded-full"
+                              style={{ width: `${progress}%` }}
+                            ></div>
+                          </div>
+                        </div>
+
+                        {/* Fund Details */}
+                        <div className="grid grid-cols-3 gap-3 text-center">
+                          <div className="bg-[#1F2937] p-3 rounded">
+                            <p className="text-xs text-gray-400 mb-1">Target</p>
+                            <p className="text-sm font-semibold text-white">LKR {Number(cause.requiredAmount).toLocaleString('en-US')}</p>
+                          </div>
+                          <div className="bg-[#1F2937] p-3 rounded">
+                            <p className="text-xs text-gray-400 mb-1">Raised</p>
+                            <p className="text-sm font-semibold text-secondary">LKR {Number(cause.fundsRaised || 0).toLocaleString('en-US')}</p>
+                          </div>
+                          <div className="bg-[#1F2937] p-3 rounded">
+                            <p className="text-xs text-gray-400 mb-1">Remaining</p>
+                            <p className="text-sm font-semibold text-primary">LKR {Number(remaining).toLocaleString('en-US')}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <RecentList title="Recent Causes Created" data={recentCauses} titleKey="title" statusKey="status" dateKey="createdAt" />
             <QuickActions role="creator" onViewChange={setActiveView} />
