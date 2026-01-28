@@ -27,20 +27,22 @@ router.post("/create", protect, authorize("creator"), upload.single("evidenceFil
     // Validate all required fields
     const { title, description, category, requiredAmount, beneficiaryName, beneficiaryContact, beneficiaryAddress, beneficiaryNIC, beneficiaryAccountName, beneficiaryBank, beneficiaryAccountNumber, beneficiaryBranch, areaCode } = req.body;
     
-    if (!title || title.length < 10) return res.status(400).json({ message: "Title must be at least 10 characters" });
-    if (!description || description.length < 30) return res.status(400).json({ message: "Description must be at least 30 characters" });
+    if (!title || title.trim().length < 10) return res.status(400).json({ message: "Title must be at least 10 characters" });
+    if (!description || description.trim().length < 30) return res.status(400).json({ message: "Description must be at least 30 characters" });
     if (!category) return res.status(400).json({ message: "Category is required" });
     if (!requiredAmount || Number(requiredAmount) < 1000) return res.status(400).json({ message: "Required amount must be at least LKR 1,000" });
     
-    if (!beneficiaryName || beneficiaryName.length < 3) return res.status(400).json({ message: "Beneficiary name must be at least 3 characters" });
-    if (!beneficiaryContact || !/^07\d{8}$/.test(beneficiaryContact)) return res.status(400).json({ message: "Invalid Sri Lankan contact number (07XXXXXXXX)" });
+    if (!beneficiaryName || beneficiaryName.trim().length < 3) return res.status(400).json({ message: "Beneficiary name must be at least 3 characters" });
+    if (!beneficiaryContact || !/^07\d{8}$/.test(beneficiaryContact.trim())) return res.status(400).json({ message: "Invalid Sri Lankan contact number (07XXXXXXXX)" });
     if (!beneficiaryAddress || beneficiaryAddress.trim().length < 10) return res.status(400).json({ message: "Beneficiary address must be at least 10 characters" });
-    if (!beneficiaryNIC || !((/^\d{12}$/.test(beneficiaryNIC)) || (/^\d{9}[VvXx]$/.test(beneficiaryNIC)))) return res.status(400).json({ message: "Invalid NIC number. Must be 12 digits or 9 digits followed by V/X" });
     
-    if (!beneficiaryAccountName || beneficiaryAccountName.length < 3) return res.status(400).json({ message: "Account name must be at least 3 characters" });
-    if (!beneficiaryBank || beneficiaryBank.length < 3) return res.status(400).json({ message: "Bank name must be at least 3 characters" });
-    if (!beneficiaryAccountNumber || !/^\d{6,20}$/.test(beneficiaryAccountNumber)) return res.status(400).json({ message: "Account number must be 6–20 digits" });
-    if (!beneficiaryBranch || beneficiaryBranch.length < 2) return res.status(400).json({ message: "Branch must be at least 2 characters" });
+    const nicTrimmed = beneficiaryNIC.trim().toUpperCase();
+    if (!beneficiaryNIC || !((/^\d{12}$/.test(nicTrimmed)) || (/^\d{9}[VvXx]$/.test(nicTrimmed)))) return res.status(400).json({ message: "Invalid NIC number. Must be 12 digits or 9 digits followed by V/X" });
+    
+    if (!beneficiaryAccountName || beneficiaryAccountName.trim().length < 3) return res.status(400).json({ message: "Account name must be at least 3 characters" });
+    if (!beneficiaryBank || beneficiaryBank.trim().length < 3) return res.status(400).json({ message: "Bank name must be at least 3 characters" });
+    if (!beneficiaryAccountNumber || !/^\d{6,20}$/.test(beneficiaryAccountNumber.trim())) return res.status(400).json({ message: "Account number must be 6–20 digits" });
+    if (!beneficiaryBranch || beneficiaryBranch.trim().length < 2) return res.status(400).json({ message: "Branch must be at least 2 characters" });
     
     if (!areaCode) return res.status(400).json({ message: "Area code (GS area) is required" });
 
