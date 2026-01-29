@@ -12,6 +12,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { FaHourglassHalf, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import UserProfileMenu from "../../components/dashboard/UserProfileMenu";
+
 
 // Spinner Component
 const Spinner = ({ size = 16, text = "Loading..." }) => (
@@ -119,11 +121,7 @@ const DSDashboard = () => {
 
         {/* Profile */}
         <div className="flex items-center gap-4 mb-6">
-          <img
-            src={user.profileImage || "/assets/images/user.webp"}
-            alt="DS Officer Profile"
-            className="w-16 h-16 rounded-full border-2 border-primary"
-          />
+          <UserProfileMenu />
           <div>
             <h2 className="text-xl font-bold text-white">{user.username}</h2>
             <p className="text-gray-400">{area.division}, {area.district}</p>

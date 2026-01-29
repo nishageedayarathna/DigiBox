@@ -4,6 +4,8 @@ import Sidebar from "../../components/dashboard/Sidebar";
 import { fetchGSDashboard } from "../../services/gsService";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { FaHourglassHalf, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import UserProfileMenu from "../../components/dashboard/UserProfileMenu";
+
 
 // Spinner Component
 const Spinner = ({ size = 16, text = "Loading..." }) => (
@@ -37,16 +39,17 @@ const GSDashboard = () => {
         });
 
         setArea({
-          district: data.welcomeInfo.gsOfficer.district,
-          division: data.welcomeInfo.gsOfficer.division,
-          gnArea: data.welcomeInfo.gsOfficer.area,
+          district: data?.welcomeInfo?.gsOfficer?.district || "",
+          division: data?.welcomeInfo?.gsOfficer?.division || "",
+          gnArea: data?.welcomeInfo?.gsOfficer?.area || "",
         });
 
         setMonthlyAnalytics(data.monthlyAnalytics || []);
+
         setUser({
-          username: data.welcomeInfo.gsOfficer.username,
-          email: data.welcomeInfo.gsOfficer.email,
-          profileImage: data.welcomeInfo.gsOfficer.profileImage || "/assets/images/user.webp",
+          username: data?.welcomeInfo?.gsOfficer?.username || "User",
+          email: data?.welcomeInfo?.gsOfficer?.email || "",
+          profileImage: data?.welcomeInfo?.gsOfficer?.profileImage || "/assets/images/user.webp",
         });
 
         setLoading(false);
@@ -115,11 +118,7 @@ const GSDashboard = () => {
 
         {/* Profile */}
         <div className="flex items-center gap-4 mb-6">
-          <img
-            src={user.profileImage}
-            alt="GS Officer Profile"
-            className="w-16 h-16 rounded-full border-2 border-primary"
-          />
+          <UserProfileMenu />
           <div>
             <h2 className="text-xl font-bold text-white">{user.username}</h2>
             <p className="text-gray-400">{area.gnArea}, {area.division}, {area.district}</p>
