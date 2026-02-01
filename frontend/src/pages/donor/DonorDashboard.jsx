@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/dashboard/Sidebar";
 import StatCard from "../../components/dashboard/StatCard";
+import UserProfileMenu from "../../components/dashboard/UserProfileMenu"; // ✅ Added
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
@@ -88,13 +89,18 @@ const DonorDashboard = () => {
       <Sidebar role="donor" />
 
       <main className="flex-1 ml-64 p-6">
-        {/* Welcome */}
-        <h1 className="text-2xl font-bold text-primary mb-2">
-          Welcome back, {data.username} 👋
-        </h1>
-        <p className="text-gray-400 mb-6">
-          Thank you for making a difference in our community.
-        </p>
+        {/* Top header with welcome message and profile circle */}
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-primary mb-2">
+              Welcome back, {data.username} 👋
+            </h1>
+            <p className="text-gray-400">
+              Thank you for making a difference in our community.
+            </p>
+          </div>
+          <UserProfileMenu /> {/* ✅ Profile circle menu */}
+        </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
