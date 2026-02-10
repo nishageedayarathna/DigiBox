@@ -109,6 +109,32 @@ router.post("/add-ds", protect, authorize("admin"), async (req, res) => {
     const exists = await User.findOne({ role: "ds", divisionCode });
     if (exists) return res.status(400).json({ message: "DS already exists for this division" });
 
+    // Find or create District
+    let district = await District.findOne({ code: districtCode });
+    if (!district) {
+      district = await District.create({
+        name: districtName,
+        code: districtCode,
+        divisions: [],
+      });
+    }
+
+    // Find or create Division
+    let division = await Division.findOne({ code: divisionCode });
+    if (!division) {
+      division = await Division.create({
+        name: divisionName,
+        code: divisionCode,
+        dsOfficer: null,
+        gsAreas: [],
+      });
+      // Add division to district
+      if (!district.divisions.includes(division._id)) {
+        district.divisions.push(division._id);
+        await district.save();
+      }
+    }
+
     const generatedPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(generatedPassword, 10);
 
@@ -123,6 +149,10 @@ router.post("/add-ds", protect, authorize("admin"), async (req, res) => {
       password: hashedPassword,
       mustResetPassword: true,
     });
+
+    // Link DS officer to division
+    division.dsOfficer = ds._id;
+    await division.save();
 
     // --- Email Notification ---
     try {
@@ -168,6 +198,47 @@ router.post("/add-gs", protect, authorize("admin"), async (req, res) => {
     const ds = await User.findOne({ role: "ds", divisionCode });
     if (!ds) return res.status(400).json({ message: "Add DS for this division first" });
 
+    // Find or create District
+    let district = await District.findOne({ code: districtCode });
+    if (!district) {
+      district = await District.create({
+        name: districtName,
+        code: districtCode,
+        divisions: [],
+      });
+    }
+
+    // Find or create Division
+    let division = await Division.findOne({ code: divisionCode });
+    if (!division) {
+      division = await Division.create({
+        name: divisionName,
+        code: divisionCode,
+        dsOfficer: ds._id,
+        gsAreas: [],
+      });
+      // Add division to district
+      if (!district.divisions.includes(division._id)) {
+        district.divisions.push(division._id);
+        await district.save();
+      }
+    }
+
+    // Find or create GSArea
+    let gsArea = await GSArea.findOne({ code: areaCode });
+    if (!gsArea) {
+      gsArea = await GSArea.create({
+        name: areaName,
+        code: areaCode,
+        gsOfficer: null,
+      });
+      // Add area to division
+      if (!division.gsAreas.includes(gsArea._id)) {
+        division.gsAreas.push(gsArea._id);
+        await division.save();
+      }
+    }
+
     const generatedPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(generatedPassword, 10);
 
@@ -184,6 +255,10 @@ router.post("/add-gs", protect, authorize("admin"), async (req, res) => {
       password: hashedPassword,
       mustResetPassword: true,
     });
+
+    // Link GS officer to gsArea
+    gsArea.gsOfficer = gs._id;
+    await gsArea.save();
 
     // --- Email Notification ---
     try {
@@ -244,30 +319,33 @@ router.delete("/users/:id", protect, authorize("admin"), async (req, res) => {
 // Get all districts, divisions, and GS areas for cause creator dropdown
 router.get("/gs-hierarchy", protect, authorize("creator"), async (req, res) => {
   try {
-    // Get all GS officers
-    const gsOfficers = await User.find({ role: "gs" }).select(
-      "districtCode districtName divisionCode divisionName areaCode areaName -_id"
-    );
+    // Get all districts with their divisions and areas
+    const districts = await District.find()
+      .populate({
+        path: "divisions",
+        populate: {
+          path: "gsAreas",
+          model: "GSArea"
+        }
+      });
 
     // Build hierarchical structure
     const hierarchy = {};
 
-    gsOfficers.forEach(gs => {
-      if (!hierarchy[gs.districtCode]) {
-        hierarchy[gs.districtCode] = {
-          districtName: gs.districtName,
-          divisions: {}
+    districts.forEach(district => {
+      hierarchy[district.code] = {
+        districtName: district.name,
+        divisions: {}
+      };
+
+      district.divisions.forEach(division => {
+        hierarchy[district.code].divisions[division.code] = {
+          divisionName: division.name,
+          areas: division.gsAreas.map(area => ({
+            areaCode: area.code,
+            areaName: area.name
+          }))
         };
-      }
-      if (!hierarchy[gs.districtCode].divisions[gs.divisionCode]) {
-        hierarchy[gs.districtCode].divisions[gs.divisionCode] = {
-          divisionName: gs.divisionName,
-          areas: []
-        };
-      }
-      hierarchy[gs.districtCode].divisions[gs.divisionCode].areas.push({
-        areaCode: gs.areaCode,
-        areaName: gs.areaName
       });
     });
 
