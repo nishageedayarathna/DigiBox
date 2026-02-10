@@ -303,11 +303,16 @@ router.get("/documents", protect, authorize("gs"), async (req, res) => {
   try {
     const docs = await Cause.find({
       areaCode: req.user.areaCode,
-      gsDocument: { $exists: true },
-    }).populate("gsOfficer", "username").select("title gsDocument updatedAt gsOfficer");
+      gsStatus: "approved",
+      gsDocument: { $exists: true, $ne: null },
+    })
+      .populate("gsOfficer", "username")
+      .select("title gsDocument updatedAt gsOfficer")
+      .sort({ updatedAt: -1 });
 
     res.json(docs);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Error fetching documents" });
   }
 });

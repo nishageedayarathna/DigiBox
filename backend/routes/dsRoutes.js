@@ -321,10 +321,12 @@ router.get("/documents", protect, authorize("ds"), async (req, res) => {
   try {
     const docs = await Cause.find({
       divisionCode: req.user.divisionCode,
-      dsDocument: { $exists: true },
+      dsStatus: "approved",
+      dsDocument: { $exists: true, $ne: null },
     })
       .populate("dsOfficer", "username")
-      .select("title dsDocument updatedAt dsOfficer");
+      .select("title dsDocument updatedAt dsOfficer")
+      .sort({ updatedAt: -1 });
 
     res.json(docs);
   } catch (err) {

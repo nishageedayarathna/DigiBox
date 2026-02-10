@@ -124,18 +124,26 @@ const DSDashboard = () => {
 
         {/* Profile */}
         <div className="flex items-center gap-4 mb-6">
+<<<<<<< HEAD
+          <img
+            src={user?.profileImage || "/assets/images/user.webp"}
+            alt="DS Officer Profile"
+            className="w-16 h-16 rounded-full border-2 border-primary"
+          />
+=======
           <UserProfileMenu />
+>>>>>>> 51b95d497047f812f19830254d7f313eaeceae20
           <div>
-            <h2 className="text-xl font-bold text-white">{user.username}</h2>
-            <p className="text-gray-400">{area.division}, {area.district}</p>
+            <h2 className="text-xl font-bold text-white">{user?.username || "DS Officer"}</h2>
+            <p className="text-gray-400">{area?.division || "N/A"}, {area?.district || "N/A"}</p>
           </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <StatCard title="Pending Causes" value={stats.pending} icon={<FaHourglassHalf />} color="yellow" />
-          <StatCard title="Approved Causes" value={stats.approved} icon={<FaCheckCircle />} color="green" />
-          <StatCard title="Rejected Causes" value={stats.rejected} icon={<FaTimesCircle />} color="red" />
+          <StatCard title="Pending Causes" value={stats?.pending || 0} icon={<FaHourglassHalf />} color="yellow" />
+          <StatCard title="Approved Causes" value={stats?.approved || 0} icon={<FaCheckCircle />} color="green" />
+          <StatCard title="Rejected Causes" value={stats?.rejected || 0} icon={<FaTimesCircle />} color="red" />
         </div>
 
         {/* Monthly Analytics Chart */}

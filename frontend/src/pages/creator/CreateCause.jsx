@@ -66,28 +66,30 @@ const CreateCause = () => {
   // VALIDATIONS
   // =========================
   const validators = {
-    title: (v) => (v.length >= 10 ? "" : "Title must be at least 10 characters."),
+    title: (v) => (v.trim().length >= 10 ? "" : "Title must be at least 10 characters."),
     description: (v) =>
-      v.length >= 30 ? "" : "Description must be at least 30 characters.",
+      v.trim().length >= 30 ? "" : "Description must be at least 30 characters.",
     category: (v) => (v ? "" : "Please select a category."),
     requiredAmount: (v) =>
       v >= 1000 ? "" : "Required amount must be at least LKR 1,000.",
     beneficiaryName: (v) =>
-      v.length >= 3 ? "" : "Name must be at least 3 characters.",
+      v.trim().length >= 3 ? "" : "Name must be at least 3 characters.",
     beneficiaryContact: (v) =>
-      /^07\d{8}$/.test(v) ? "" : "Enter a valid Sri Lankan number.",
+      /^07\d{8}$/.test(v.trim()) ? "" : "Enter a valid Sri Lankan number.",
     beneficiaryAddress: (v) =>
-      v.length >= 10 ? "" : "Address must be at least 10 characters.",
-    beneficiaryNIC: (v) =>
-      /^\d{12}$/.test(v) || /^\d{9}[VvXx]$/.test(v) ? "" : "Enter a valid NIC (12 digits or 9 digits + V/X).",
+      v.trim().length >= 10 ? "" : "Address must be at least 10 characters.",
+    beneficiaryNIC: (v) => {
+      const nicTrimmed = v.trim().toUpperCase();
+      return /^\d{12}$/.test(nicTrimmed) || /^\d{9}[VvXx]$/.test(nicTrimmed) ? "" : "Enter a valid NIC (12 digits or 9 digits + V/X).";
+    },
     beneficiaryAccountName: (v) =>
-      v.length >= 3 ? "" : "Account name must be at least 3 characters.",
+      v.trim().length >= 3 ? "" : "Account name must be at least 3 characters.",
     beneficiaryBank: (v) =>
-      v.length >= 3 ? "" : "Bank name must be at least 3 characters.",
+      v.trim().length >= 3 ? "" : "Bank name must be at least 3 characters.",
     beneficiaryAccountNumber: (v) =>
-      /^\d{6,20}$/.test(v) ? "" : "Account number must be 6–20 digits.",
+      /^\d{6,20}$/.test(v.trim()) ? "" : "Account number must be 6–20 digits.",
     beneficiaryBranch: (v) =>
-      v.length >= 2 ? "" : "Branch must be at least 2 characters.",
+      v.trim().length >= 2 ? "" : "Branch must be at least 2 characters.",
     areaCode: (v) => (v ? "" : "Please select an area code."),
   };
 
