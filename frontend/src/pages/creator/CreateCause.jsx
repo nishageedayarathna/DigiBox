@@ -277,6 +277,12 @@ const CreateCause = () => {
                 name="requiredAmount"
                 value={formData.requiredAmount}
                 onChange={handleChange}
+                onInput={(e) => {
+                  if (e.target.value < 0) e.target.value = 0;
+                }}
+                min="1000"
+                step="0.01"
+                placeholder="Minimum LKR 1,000"
                 className="w-full p-3 bg-[#111827] border border-gray-600 rounded-lg"
               />
               {renderError(errors.requiredAmount)}

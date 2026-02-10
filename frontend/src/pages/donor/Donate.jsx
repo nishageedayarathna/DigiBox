@@ -348,9 +348,13 @@ const Donate = () => {
                       type="number"
                       value={donationAmount}
                       onChange={(e) => setDonationAmount(e.target.value)}
+                      onInput={(e) => {
+                        if (e.target.value < 0) e.target.value = 0;
+                      }}
                       placeholder="Enter amount"
                       min="100"
                       max={remainingAmount}
+                      step="0.01"
                       className="w-full p-4 bg-[#111827] border border-gray-600 rounded-lg text-white focus:outline-none focus:border-primary text-lg"
                       required
                     />
