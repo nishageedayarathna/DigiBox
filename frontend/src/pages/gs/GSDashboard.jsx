@@ -121,15 +121,7 @@ const GSDashboard = () => {
 
         {/* Profile */}
         <div className="flex items-center gap-4 mb-6">
-<<<<<<< HEAD
-          <img
-            src={user?.profileImage || "/assets/images/user.webp"}
-            alt="GS Officer Profile"
-            className="w-16 h-16 rounded-full border-2 border-primary"
-          />
-=======
           <UserProfileMenu />
->>>>>>> 51b95d497047f812f19830254d7f313eaeceae20
           <div>
             <h2 className="text-xl font-bold text-white">{user?.username || "GS Officer"}</h2>
             <p className="text-gray-400">{area?.gnArea || "N/A"}, {area?.division || "N/A"}, {area?.district || "N/A"}</p>
