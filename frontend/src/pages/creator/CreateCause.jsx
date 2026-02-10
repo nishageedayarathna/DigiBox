@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Sidebar from "../../components/dashboard/Sidebar";
+import AlertModal from "../../components/AlertModal";
 
 const CreateCause = () => {
   const navigate = useNavigate();
@@ -29,6 +30,8 @@ const CreateCause = () => {
   const [hierarchy, setHierarchy] = useState({});
   const [loadingHierarchy, setLoadingHierarchy] = useState(true);
   const [successMessage, setSuccessMessage] = useState("");
+  const [alert, setAlert] = useState({ isOpen: false, message: "", type: "info" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedDivision, setSelectedDivision] = useState("");
@@ -140,13 +143,14 @@ const CreateCause = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      return alert("Fix all errors before submitting.");
+      return setAlert({ isOpen: true, message: "Fix all errors before submitting.", type: "warning" });
     }
 
     const data = new FormData();
     Object.entries(formData).forEach(([k, v]) => data.append(k, v));
     data.append("evidenceFile", evidence);
 
+    setIsSubmitting(true);
     try {
       await axios.post("http://localhost:5000/api/cause/create", data, {
         headers: {
@@ -189,7 +193,9 @@ const CreateCause = () => {
     } catch (err) {
       const errorMsg = err.response?.data?.message || err.message || "Error submitting cause";
       console.error("Submission error:", err);
-      alert(`❌ Error: ${errorMsg}`);
+      setAlert({ isOpen: true, message: `❌ Error: ${errorMsg}`, type: "error" });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -476,11 +482,28 @@ const CreateCause = () => {
               </div>
             </div>
 
-            <button className="w-full py-3 bg-primary rounded-lg font-semibold hover:bg-secondary">
-              Submit Cause
+            <button 
+              disabled={isSubmitting}
+              className="w-full py-3 bg-primary rounded-lg font-semibold hover:bg-secondary transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Submitting...
+                </span>
+              ) : (
+                "Submit Cause"
+              )}
             </button>
           </form>
         </div>
+
+        <AlertModal 
+          message={alert.message} 
+          isOpen={alert.isOpen} 
+          onClose={() => setAlert({ ...alert, isOpen: false })} 
+          type={alert.type}
+        />
       </main>
     </div>
   );

@@ -27,9 +27,27 @@ const GSDashboard = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [causesLoading, setCausesLoading] = useState(false);
 
+  const fetchAllCauses = async (status = "all") => {
+    setCausesLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const params = status !== "all" ? { status } : {};
+      const res = await fetch(`http://localhost:5000/api/gs/all-causes?${new URLSearchParams(params)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setAllCauses(data);
+    } catch (err) {
+      console.error("Failed to fetch causes:", err);
+    } finally {
+      setCausesLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchGSDashboard()
-      .then((res) => {
+    const loadDashboard = async () => {
+      try {
+        const res = await fetchGSDashboard();
         const data = res.data;
 
         setStats({
@@ -52,32 +70,17 @@ const GSDashboard = () => {
           profileImage: data?.welcomeInfo?.gsOfficer?.profileImage || "/assets/images/user.webp",
         });
 
+        // Fetch causes after dashboard data is loaded
+        await fetchAllCauses("all");
         setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error(err);
         setLoading(false);
-      });
+      }
+    };
 
-    fetchAllCauses();
+    loadDashboard();
   }, []);
-
-  const fetchAllCauses = async (status = "all") => {
-    setCausesLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      const params = status !== "all" ? { status } : {};
-      const res = await fetch(`http://localhost:5000/api/gs/all-causes?${new URLSearchParams(params)}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setAllCauses(data);
-    } catch (err) {
-      console.error("Failed to fetch causes:", err);
-    } finally {
-      setCausesLoading(false);
-    }
-  };
 
   const handleFilterChange = (status) => {
     setFilterStatus(status);

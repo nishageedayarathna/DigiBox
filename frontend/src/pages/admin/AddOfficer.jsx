@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Sidebar from "../../components/dashboard/Sidebar";
+import AlertModal from "../../components/AlertModal";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import FormInput from "../../components/FormInput";
 
 const AddOfficer = () => {
@@ -16,20 +18,23 @@ const AddOfficer = () => {
     areaName: "",
   });
 
+  const [alert, setAlert] = useState({ isOpen: false, message: "", type: "info" });
+  const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("token");
 
   const submit = async (e) => {
     e.preventDefault();
 
     if (!form.username || !form.email)
-      return alert("Fill username and email");
+      return setAlert({ isOpen: true, message: "Fill username and email", type: "warning" });
     if (!form.districtCode || !form.districtName)
-      return alert("Fill district code and name");
+      return setAlert({ isOpen: true, message: "Fill district code and name", type: "warning" });
     if (!form.divisionCode || !form.divisionName)
-      return alert("Fill division code and name");
+      return setAlert({ isOpen: true, message: "Fill division code and name", type: "warning" });
     if (form.role === "gs" && (!form.areaCode || !form.areaName))
-      return alert("Fill area code and name for GS");
+      return setAlert({ isOpen: true, message: "Fill area code and name for GS", type: "warning" });
 
+    setLoading(true);
     try {
       const endpoint =
         form.role === "ds"
@@ -61,7 +66,7 @@ const AddOfficer = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      alert(res.data.message);
+      setAlert({ isOpen: true, message: res.data.message, type: "success" });
 
       setForm({
         username: "",
@@ -76,7 +81,9 @@ const AddOfficer = () => {
       });
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Error adding officer");
+      setAlert({ isOpen: true, message: err.response?.data?.message || "Error adding officer", type: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -187,12 +194,27 @@ const AddOfficer = () => {
 
             <button
               type="submit"
-              className="w-full bg-primary hover:bg-secondary transition text-white font-medium py-3 rounded-lg"
+              disabled={loading}
+              className="w-full bg-primary hover:bg-secondary transition text-white font-medium py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Add Officer
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Adding officer...
+                </span>
+              ) : (
+                "Add Officer"
+              )}
             </button>
           </form>
         </div>
+
+        <AlertModal 
+          message={alert.message} 
+          isOpen={alert.isOpen} 
+          onClose={() => setAlert({ ...alert, isOpen: false })} 
+          type={alert.type}
+        />
       </main>
     </div>
   );

@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/dashboard/Sidebar";
+import AlertModal from "../../components/AlertModal";
 import axios from "axios";
 import { jsPDF } from "jspdf";
 
 const Modal = ({ title, onClose, children }) => (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div className="bg-[#1F2937] rounded-lg p-6 max-w-2xl w-11/12 shadow-xl">
-      <h2 className="text-xl font-bold text-white mb-4">{title}</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold text-white">{title}</h2>
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-white transition text-2xl leading-none"
+          title="Close"
+        >
+          ×
+        </button>
+      </div>
       {children}
     </div>
   </div>
@@ -21,6 +31,10 @@ const PendingCauses = () => {
   const [reason, setReason] = useState("");
   const [signature, setSignature] = useState(null);
   const [pdfPreview, setPdfPreview] = useState(null);
+  const [alert, setAlert] = useState({ isOpen: false, message: "", type: "info" });
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -50,11 +64,12 @@ const PendingCauses = () => {
 
   /* ---------------- GENERATE PDF PREVIEW ---------------- */
   const generatePDFPreview = () => {
-    if (!notes || !signature) return alert("Verification notes and signature required");
-
-    const reader = new FileReader();
-    reader.readAsDataURL(signature);
-    reader.onloadend = () => {
+    if (!notes || !signature) return setAlert({ isOpen: true, message: "Verification notes and signature required", type: "warning" });
+    setIsGeneratingPDF(true);
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(signature);
+      reader.onloadend = () => {
       const doc = new jsPDF();
       
       // ========== LETTERHEAD DESIGN ==========
@@ -209,17 +224,25 @@ const PendingCauses = () => {
 
       const blob = doc.output("blob");
       setPdfPreview(URL.createObjectURL(blob));
-    };
+      };
+    } catch (err) {
+      console.error(err);
+      setAlert({ isOpen: true, message: "Failed to generate PDF", type: "error" });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   /* ---------------- APPROVE CAUSE ---------------- */
   const approveCause = async () => {
-    if (!notes || !signature) return alert("Notes and signature required");
-
-    const reader = new FileReader();
-    reader.readAsDataURL(signature);
-    reader.onloadend = async () => {
-      try {
+    if (!notes || !signature) return setAlert({ isOpen: true, message: "Notes and signature required", type: "warning" });
+    setIsApproving(true);
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(signature);
+      await new Promise((resolve) => {
+        reader.onloadend = async () => {
+          try {
         // Generate the same formatted PDF as preview
         const doc = new jsPDF();
         
@@ -376,20 +399,28 @@ const PendingCauses = () => {
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        alert("Cause approved and forwarded to DS Officer");
+        setAlert({ isOpen: true, message: "Cause approved and forwarded to DS Officer", type: "success" });
         closeModals();
         fetchPending();
-      } catch (err) {
-        console.error(err);
-        alert(err.response?.data?.message || "Approval failed");
-      }
-    };
+          } catch (err) {
+            console.error(err);
+            setAlert({ isOpen: true, message: err.response?.data?.message || "Approval failed", type: "error" });
+          } finally {
+            resolve();
+          }
+        };
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsApproving(false);
+    }
   };
 
   /* ---------------- REJECT CAUSE ---------------- */
   const rejectCause = async () => {
-    if (!reason) return alert("Reason is required");
-
+    if (!reason) return setAlert({ isOpen: true, message: "Reason is required", type: "warning" });
+    setIsRejecting(true);
     try {
       await axios.put(
         `http://localhost:5000/api/gs/reject/${selectedCause._id}`,
@@ -397,12 +428,14 @@ const PendingCauses = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      alert("Cause rejected successfully");
+      setAlert({ isOpen: true, message: "Cause rejected successfully", type: "success" });
       closeModals();
       fetchPending();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Rejection failed");
+      setAlert({ isOpen: true, message: err.response?.data?.message || "Rejection failed", type: "error" });
+    } finally {
+      setIsRejecting(false);
     }
   };
 
@@ -567,9 +600,17 @@ const PendingCauses = () => {
           {!pdfPreview && (
             <button
               onClick={generatePDFPreview}
-              className="w-full bg-blue-600 py-2 rounded mb-2"
+              disabled={isGeneratingPDF}
+              className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded mb-2 text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Generate Letter Preview
+              {isGeneratingPDF ? (
+                <span className="flex items-center justify-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Generating PDF...
+                </span>
+              ) : (
+                "Generate Letter Preview"
+              )}
             </button>
           )}
 
@@ -593,9 +634,17 @@ const PendingCauses = () => {
           {/* Final approval button */}
           <button
             onClick={approveCause}
-            className="w-full bg-green-600 py-2 rounded"
+            disabled={isApproving}
+            className="w-full bg-green-600 hover:bg-green-700 py-2 rounded text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Approve & Forward to DS Officer
+            {isApproving ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Approving...
+              </span>
+            ) : (
+              "Approve & Forward to DS Officer"
+            )}
           </button>
         </Modal>
       )}
@@ -611,12 +660,27 @@ const PendingCauses = () => {
           />
           <button
             onClick={rejectCause}
-            className="w-full bg-red-600 py-2 rounded"
+            disabled={isRejecting}
+            className="w-full bg-red-600 hover:bg-red-700 py-2 rounded text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Confirm Rejection
+            {isRejecting ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Rejecting...
+              </span>
+            ) : (
+              "Confirm Rejection"
+            )}
           </button>
         </Modal>
       )}
+
+      <AlertModal 
+        message={alert.message} 
+        isOpen={alert.isOpen} 
+        onClose={() => setAlert({ ...alert, isOpen: false })} 
+        type={alert.type}
+      />
     </div>
   );
 };

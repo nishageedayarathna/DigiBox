@@ -1,21 +1,23 @@
 import React, { useState } from "react";
 import Sidebar from "../../components/dashboard/Sidebar";
+import AlertModal from "../../components/AlertModal";
 import { resetGSPassword } from "../../services/gsService";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({ isOpen: false, message: "", type: "info" });
 
   const handleSubmit = async () => {
-    if (!password) return alert("Password cannot be empty");
+    if (!password) return setAlert({ isOpen: true, message: "Password cannot be empty", type: "warning" });
 
     try {
       setLoading(true);
       await resetGSPassword(password);
-      alert("Password updated successfully");
+      setAlert({ isOpen: true, message: "Password updated successfully", type: "success" });
       setPassword("");
     } catch (err) {
-      alert(err.response?.data?.message || "Password reset failed");
+      setAlert({ isOpen: true, message: err.response?.data?.message || "Password reset failed", type: "error" });
     } finally {
       setLoading(false);
     }
@@ -42,11 +44,25 @@ const ResetPassword = () => {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full bg-primary py-2 rounded font-semibold hover:bg-secondary"
+            className="w-full bg-primary py-2 rounded font-semibold hover:bg-secondary transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Updating..." : "Update Password"}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                Updating...
+              </span>
+            ) : (
+              "Update Password"
+            )}
           </button>
         </div>
+
+        <AlertModal 
+          message={alert.message} 
+          isOpen={alert.isOpen} 
+          onClose={() => setAlert({ ...alert, isOpen: false })} 
+          type={alert.type}
+        />
       </main>
     </div>
   );

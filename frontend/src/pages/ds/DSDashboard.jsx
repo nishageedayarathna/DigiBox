@@ -35,6 +35,18 @@ const DSDashboard = () => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [causesLoading, setCausesLoading] = useState(false);
 
+  const fetchAllCauses = async (status = "all") => {
+    setCausesLoading(true);
+    try {
+      const res = await fetchDSAllCauses(status);
+      setAllCauses(res.data);
+    } catch (err) {
+      console.error("Failed to fetch causes:", err);
+    } finally {
+      setCausesLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchDSDashboard()
       .then((res) => {
@@ -64,19 +76,10 @@ const DSDashboard = () => {
         console.error(err);
         setLoading(false);
       });
-  }, []);
 
-  const fetchAllCauses = async (status = "all") => {
-    setCausesLoading(true);
-    try {
-      const res = await fetchDSAllCauses(status);
-      setAllCauses(res.data);
-    } catch (err) {
-      console.error("Failed to fetch causes:", err);
-    } finally {
-      setCausesLoading(false);
-    }
-  };
+    // Fetch causes on initial load
+    fetchAllCauses("all");
+  }, []);
 
   const handleFilterChange = (status) => {
     setFilterStatus(status);

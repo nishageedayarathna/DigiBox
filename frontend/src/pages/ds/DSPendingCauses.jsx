@@ -1,12 +1,23 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/dashboard/Sidebar";
 import { fetchDSPendingCauses, approveDSCause, rejectDSCause } from "../../services/dsService";
+import AlertModal from "../../components/AlertModal";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { jsPDF } from "jspdf";
 
 const Modal = ({ title, onClose, children }) => (
   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div className="bg-[#1F2937] rounded-lg p-6 max-w-2xl w-11/12 shadow-xl">
-      <h2 className="text-xl font-bold text-white mb-4">{title}</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-bold text-white">{title}</h2>
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-white transition text-2xl leading-none"
+          title="Close"
+        >
+          ×
+        </button>
+      </div>
       {children}
     </div>
   </div>
@@ -21,6 +32,10 @@ const DSPendingCauses = () => {
   const [reason, setReason] = useState("");
   const [signature, setSignature] = useState(null);
   const [pdfPreview, setPdfPreview] = useState(null);
+  const [alert, setAlert] = useState({ isOpen: false, message: "", type: "info" });
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
 
   useEffect(() => {
     loadPendingCauses();
@@ -48,10 +63,12 @@ const DSPendingCauses = () => {
 
   // ---------------- GENERATE PDF PREVIEW ----------------
   const generatePDFPreview = () => {
-    if (!notes || !signature) return alert("Notes and signature required");
-    const reader = new FileReader();
-    reader.readAsDataURL(signature);
-    reader.onloadend = () => {
+    if (!notes || !signature) return setAlert({ isOpen: true, message: "Notes and signature required", type: "warning" });
+    setIsGeneratingPDF(true);
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(signature);
+      reader.onloadend = () => {
       const doc = new jsPDF();
       
       // ========== LETTERHEAD DESIGN ==========
@@ -220,39 +237,59 @@ const DSPendingCauses = () => {
 
       const blob = doc.output("blob");
       setPdfPreview(URL.createObjectURL(blob));
-    };
+      };
+    } catch (err) {
+      console.error(err);
+      setAlert({ isOpen: true, message: "Failed to generate PDF", type: "error" });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
   const handleApprove = async () => {
-    if (!notes || !signature) return alert("Notes and signature required");
-    const reader = new FileReader();
-    reader.readAsDataURL(signature);
-    reader.onloadend = async () => {
-      try {
-        await approveDSCause(selectedCause._id, {
-          approvalNote: notes,
-          signatureImage: reader.result,
-        });
-        alert("Cause approved and admin notified");
-        closeModals();
-        loadPendingCauses();
-      } catch (err) {
-        console.error(err);
-        alert(err.response?.data?.message || "Approval failed");
-      }
-    };
+    if (!notes || !signature) return setAlert({ isOpen: true, message: "Notes and signature required", type: "warning" });
+    setIsApproving(true);
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(signature);
+      await new Promise((resolve) => {
+        reader.onloadend = async () => {
+          try {
+            await approveDSCause(selectedCause._id, {
+              approvalNote: notes,
+              signatureImage: reader.result,
+            });
+            setAlert({ isOpen: true, message: "Cause approved and admin notified", type: "success" });
+            closeModals();
+            loadPendingCauses();
+          } catch (err) {
+            console.error(err);
+            setAlert({ isOpen: true, message: err.response?.data?.message || "Approval failed", type: "error" });
+          } finally {
+            resolve();
+          }
+        };
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsApproving(false);
+    }
   };
 
   const handleReject = async () => {
-    if (!reason) return alert("Reason required");
+    if (!reason) return setAlert({ isOpen: true, message: "Reason required", type: "warning" });
+    setIsRejecting(true);
     try {
       await rejectDSCause(selectedCause._id, reason);
-      alert("Cause rejected and admin notified");
+      setAlert({ isOpen: true, message: "Cause rejected and admin notified", type: "success" });
       closeModals();
       loadPendingCauses();
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Rejection failed");
+      setAlert({ isOpen: true, message: err.response?.data?.message || "Rejection failed", type: "error" });
+    } finally {
+      setIsRejecting(false);
     }
   };
 
@@ -328,7 +365,54 @@ const DSPendingCauses = () => {
         {selectedCause && !showApprove && !showReject && (
           <Modal title={`${selectedCause.title} - Full Details`} onClose={closeModals}>
             <div className="space-y-4 max-h-96 overflow-y-auto">
-              {/* ... DETAILS CONTENT SAME AS BEFORE ... */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-gray-400 text-sm">Creator</p>
+                  <p className="text-white font-medium">{selectedCause.creator?.username}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400 text-sm">Email</p>
+                  <p className="text-white font-medium">{selectedCause.creator?.email}</p>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-600 pt-3">
+                <p className="text-gray-300 font-semibold mb-2">📋 Cause Information</p>
+                <p className="text-sm text-gray-300"><span className="text-gray-500">Description:</span> {selectedCause.description}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Category:</span> {selectedCause.category}</p>
+              </div>
+
+              <div className="border-t border-gray-600 pt-3">
+                <p className="text-gray-300 font-semibold mb-2">👤 Beneficiary Information</p>
+                <p className="text-sm text-gray-300"><span className="text-gray-500">Name:</span> {selectedCause.beneficiaryName}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Phone:</span> {selectedCause.beneficiaryContact}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">NIC Number:</span> {selectedCause.beneficiaryNIC}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Address:</span> {selectedCause.beneficiaryAddress}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Bank:</span> {selectedCause.beneficiaryBank}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Account Name:</span> {selectedCause.beneficiaryAccountName}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Account #:</span> {selectedCause.beneficiaryAccountNumber}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Branch:</span> {selectedCause.beneficiaryBranch}</p>
+              </div>
+
+              <div className="border-t border-gray-600 pt-3">
+                <p className="text-gray-300 font-semibold mb-2">💰 Fund Information</p>
+                <p className="text-sm text-gray-300"><span className="text-gray-500">Required Amount:</span> LKR {selectedCause.requiredAmount}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Funds Raised:</span> LKR {selectedCause.fundsRaised || 0}</p>
+                <p className="text-sm text-gray-300 mt-1"><span className="text-gray-500">Donors Count:</span> {selectedCause.donorsCount || 0}</p>
+              </div>
+
+              <div className="border-t border-gray-600 pt-3">
+                <p className="text-gray-300 font-semibold mb-2">📄 Evidence File</p>
+                <a
+                  href={`http://localhost:5000${selectedCause.evidenceFile}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary underline hover:text-primary-light"
+                >
+                  View {selectedCause.evidenceFileType === "pdf" ? "PDF" : "Image"}
+                </a>
+              </div>
+
               <button
                 onClick={closeModals}
                 className="w-full bg-gray-600 py-2 rounded mt-4"
@@ -364,9 +448,17 @@ const DSPendingCauses = () => {
                   </div>
                   <button
                     onClick={generatePDFPreview}
-                    className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded text-white transition"
+                    disabled={isGeneratingPDF}
+                    className="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Generate PDF Preview
+                    {isGeneratingPDF ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Generating PDF...
+                      </span>
+                    ) : (
+                      "Generate PDF Preview"
+                    )}
                   </button>
                 </>
               ) : (
@@ -383,9 +475,17 @@ const DSPendingCauses = () => {
               {!pdfPreview && (
                 <button
                   onClick={handleApprove}
-                  className="w-full bg-green-600 hover:bg-green-700 py-2 rounded text-white transition"
+                  disabled={isApproving}
+                  className="w-full bg-green-600 hover:bg-green-700 py-2 rounded text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Approve & Notify Admin
+                  {isApproving ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Approving...
+                    </span>
+                  ) : (
+                    "Approve & Notify Admin"
+                  )}
                 </button>
               )}
             </div>
@@ -406,13 +506,28 @@ const DSPendingCauses = () => {
               />
               <button
                 onClick={handleReject}
-                className="w-full bg-red-600 hover:bg-red-700 py-2 rounded text-white transition"
+                disabled={isRejecting}
+                className="w-full bg-red-600 hover:bg-red-700 py-2 rounded text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Reject & Notify Admin
+                {isRejecting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Rejecting...
+                  </span>
+                ) : (
+                  "Reject & Notify Admin"
+                )}
               </button>
             </div>
           </Modal>
         )}
+
+        <AlertModal 
+          message={alert.message} 
+          isOpen={alert.isOpen} 
+          onClose={() => setAlert({ ...alert, isOpen: false })} 
+          type={alert.type}
+        />
       </main>
     </div>
   );
